@@ -6,11 +6,16 @@ package mod
 
 import (
 	"io/ioutil"
+	"path/filepath"
 
 	"golang.org/x/mod/modfile"
 
+	"github.com/rvflash/goup"
 	"github.com/rvflash/goup/internal/semver"
 )
+
+// Filename
+const Filename = "go.mod"
 
 // Mod
 type Mod interface {
@@ -26,6 +31,9 @@ type File struct {
 
 // OpenFile
 func OpenFile(path string) (*File, error) {
+	if filepath.Base(path) != Filename {
+		return nil, goup.ErrMod
+	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err

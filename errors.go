@@ -27,6 +27,8 @@ const (
 	ErrRepository = errUp("invalid repository")
 	// ErrFetch
 	ErrFetch = errUp("failed to list tags")
+	// ErrFormat
+	ErrFormat = "invalid format or charset"
 )
 
 // Errorf

@@ -17,19 +17,12 @@ import (
 	"github.com/rvflash/goup/internal/semver"
 )
 
+// Name is the name of this VCS.
+const Name = "git"
+
 // System
 type System struct {
 	storage storage.Storer
-}
-
-// New
-func New() *System {
-	return &System{storage: memory.NewStorage()}
-}
-
-// CanCanFetch implements the VCS interface.
-func (s *System) CanFetch(_ string) bool {
-	return true
 }
 
 type reference struct {
@@ -37,8 +30,47 @@ type reference struct {
 	err  error
 }
 
-// FetchContext implements the VCS interface.
-func (s *System) FetchContext(ctx context.Context, path string) (semver.Tags, error) {
+// New
+func New() *System {
+	return &System{storage: memory.NewStorage()}
+}
+
+// CanCanFetch implements the vcs.System interface.
+func (s *System) CanFetch(_ string) bool {
+	return true
+}
+
+// FetchURL implements the vcs.System interface.
+func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
+	if ctx == nil || s.storage == nil {
+		return nil, goup.ErrSystem
+	}
+	if url == "" {
+		return nil, goup.ErrRepository
+	}
+	var c = make(chan *reference, 1)
+	go func() {
+		c <- s.fetch(url)
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case ref := <-c:
+		if err := ref.err; err != nil {
+			return nil, err
+		}
+		return ref.list, nil
+	}
+}
+
+// FetchPath implements the vcs.System interface.
+func (s *System) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
+	if ctx == nil || s.storage == nil {
+		return nil, goup.ErrSystem
+	}
+	if path == "" {
+		return nil, goup.ErrRepository
+	}
 	var c = make(chan *reference, 1)
 	go func() {
 		c <- s.fetchWithRetry(path)
@@ -81,21 +113,13 @@ func (s *System) fetchWithRetry(path string) (ref *reference) {
 
 func (s *System) fetch(url string) (ref *reference) {
 	ref = new(reference)
-	if s.storage == nil {
-		ref.err = goup.Errorf("git", goup.ErrSystem)
-		return
-	}
-	if url == "" {
-		ref.err = goup.Errorf("git", goup.ErrRepository)
-		return
-	}
 	rem := git.NewRemote(s.storage, &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
 	})
 	res, err := rem.List(&git.ListOptions{})
 	if err != nil {
-		ref.err = goup.Errorf("git", goup.ErrFetch, err)
+		ref.err = goup.Errorf(Name, goup.ErrFetch, err)
 		return
 	}
 	var n plumbing.ReferenceName

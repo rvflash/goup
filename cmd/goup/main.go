@@ -39,7 +39,7 @@ func main() {
 	flag.Parse()
 
 	ctx := context.Background()
-	if !a.Check(ctx, append([]string{"/mnt/data/go/src/github.com/rvflash/goup/go.mod"}, flag.Args()...)) {
+	if !a.Check(ctx, flag.Args()) {
 		os.Exit(1)
 	}
 }

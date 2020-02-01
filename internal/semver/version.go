@@ -6,6 +6,7 @@ package semver
 
 import (
 	"fmt"
+	"strings"
 
 	"golang.org/x/mod/semver"
 )
@@ -47,17 +48,28 @@ type Tag interface {
 
 // New
 func New(version string) *Version {
-	v := new(Version)
-	if !semver.IsValid(version) {
+	var (
+		v = new(Version)
+		s = trim(version)
+	)
+	if !semver.IsValid(s) {
 		return v
 	}
 	v.raw = version
-	v.canonical = semver.Canonical(version)
-	v.major = semver.Major(version)
-	v.majorMinor = semver.MajorMinor(version)
-	v.prerelease = semver.Prerelease(version)
-	v.build = semver.Build(version)
+	v.canonical = semver.Canonical(s)
+	v.major = semver.Major(s)
+	v.majorMinor = semver.MajorMinor(s)
+	v.prerelease = semver.Prerelease(s)
+	v.build = semver.Build(s)
 	return v
+}
+
+func trim(s string) string {
+	p := strings.LastIndex(s, "/")
+	if p > -1 {
+		return s[p+1:]
+	}
+	return s
 }
 
 // Version

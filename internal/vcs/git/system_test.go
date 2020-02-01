@@ -14,7 +14,7 @@ import (
 
 func TestNew(t *testing.T) {
 	r := git.New()
-	rs, err := r.FetchContext(context.Background(), "github.com/Zenika/MARCEL")
+	rs, err := r.FetchPath(context.Background(), "github.com/Zenika/MARCEL")
 	fmt.Println(err)
 	fmt.Println(rs)
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
+	"github.com/rvflash/goup/internal/vcs/goget"
 )
 
 // Checker
@@ -70,11 +71,18 @@ func Module(ctx context.Context, dep mod.Module, conf Config) (string, error) {
 	if conf.ExcludeIndirect && dep.Indirect() {
 		return skipped(dep), nil
 	}
-	for _, remote := range []vcs.Remote{git.New()} {
+	var (
+		gitVCS     = git.New()
+		httpClient = vcs.NewHTTPClient(conf.Timeout)
+	)
+	for _, remote := range []vcs.System{
+		goget.New(httpClient, gitVCS),
+		gitVCS,
+	} {
 		if !remote.CanFetch(dep.Path()) {
 			continue
 		}
-		vs, err := remote.FetchContext(ctx, dep.Path())
+		vs, err := remote.FetchPath(ctx, dep.Path())
 		if err != nil {
 			return "", newError(dep, err)
 		}
@@ -114,7 +122,11 @@ func onlyTag(d mod.Module, paths string) error {
 		return nil
 	}
 	for _, path := range strings.Split(paths, sep) {
-		if strings.Contains(d.Path(), strings.TrimSpace(path)) && !d.Version().IsTag() {
+		path = strings.TrimSpace(path)
+		if path == "" {
+			continue
+		}
+		if strings.Contains(d.Path(), path) && !d.Version().IsTag() {
 			return goup.ErrExpectedTag
 		}
 	}

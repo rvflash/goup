@@ -8,6 +8,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/rvflash/goup/internal/mod"
 	"github.com/rvflash/goup/pkg/goup"
@@ -38,7 +39,7 @@ func (a *App) Check(ctx context.Context, paths []string) bool {
 		a.errorf("version %s\n", a.buildVersion)
 	}
 	var errorExit bool
-	for _, path := range paths {
+	for _, path := range checkPaths(paths) {
 		f, err := mod.OpenFile(path)
 		if err != nil {
 			return true
@@ -68,4 +69,48 @@ func (a *App) printf(format string, v ...interface{}) {
 		return
 	}
 	a.stdin.Printf(format, v...)
+}
+
+const (
+	currentDir = "."
+	recursive  = "./..."
+)
+
+func checkPaths(paths []string) []string {
+	switch len(paths) {
+	case 0:
+		return []string{filePath(currentDir)}
+	case 1:
+		if paths[0] == recursive {
+			return walkPath(currentDir)
+		}
+	}
+	for k, v := range paths {
+		paths[k] = filePath(v)
+	}
+	return paths
+}
+
+func filePath(path string) string {
+	if filepath.Base(path) == mod.Filename {
+		return path
+	}
+	return filepath.Join(path, mod.Filename)
+}
+
+func walkPath(root string) []string {
+	var res []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if filepath.Base(path) == mod.Filename {
+			res = append(res, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return []string{root}
+	}
+	return res
 }

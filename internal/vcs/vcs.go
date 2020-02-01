@@ -6,18 +6,35 @@ package vcs
 
 import (
 	"context"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/rvflash/goup/internal/semver"
 )
 
-// Remote
-type Remote interface {
+// System
+type System interface {
 	CanFetch(path string) bool
-	FetchContext(ctx context.Context, path string) (semver.Tags, error)
+	FetchPath(ctx context.Context, path string) (semver.Tags, error)
 }
 
 // HTTPClient
 type HTTPClient interface {
-	Get(url string) (resp *http.Response, err error)
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// NewHTTPClient
+func NewHTTPClient(timeout time.Duration) *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   timeout,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			TLSHandshakeTimeout:   timeout,
+			ResponseHeaderTimeout: timeout,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
 }
