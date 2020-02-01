@@ -13,8 +13,9 @@ import (
 	"gopkg.in/src-d/go-git.v4/storage"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 
-	"github.com/rvflash/goup"
+	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
+	"github.com/rvflash/goup/internal/vcs"
 )
 
 // Name is the name of this VCS.
@@ -43,10 +44,10 @@ func (s *System) CanFetch(_ string) bool {
 // FetchURL implements the vcs.System interface.
 func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
 	if ctx == nil || s.storage == nil {
-		return nil, goup.ErrSystem
+		return nil, errors.ErrSystem
 	}
 	if url == "" {
-		return nil, goup.ErrRepository
+		return nil, errors.ErrRepository
 	}
 	var c = make(chan *reference, 1)
 	go func() {
@@ -66,10 +67,10 @@ func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) 
 // FetchPath implements the vcs.System interface.
 func (s *System) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
 	if ctx == nil || s.storage == nil {
-		return nil, goup.ErrSystem
+		return nil, errors.ErrSystem
 	}
 	if path == "" {
-		return nil, goup.ErrRepository
+		return nil, errors.ErrRepository
 	}
 	var c = make(chan *reference, 1)
 	go func() {
@@ -119,7 +120,7 @@ func (s *System) fetch(url string) (ref *reference) {
 	})
 	res, err := rem.List(&git.ListOptions{})
 	if err != nil {
-		ref.err = goup.Errorf(Name, goup.ErrFetch, err)
+		ref.err = vcs.Errorf(Name, errors.ErrFetch, err)
 		return
 	}
 	var n plumbing.ReferenceName

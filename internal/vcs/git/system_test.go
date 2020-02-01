@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/rvflash/gomod/internal/vcs/git"
+	"github.com/rvflash/goup/internal/vcs/git"
 )
 
 func TestNew(t *testing.T) {

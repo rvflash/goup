@@ -5,42 +5,43 @@
 package mod
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
-	"golang.org/x/mod/modfile"
-
-	"github.com/rvflash/goup"
+	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
+
+	"golang.org/x/mod/modfile"
 )
 
-// Filename
+// Filename is the name of Go Module file.
 const Filename = "go.mod"
 
-// Mod
+// Mod represents a Go Module file.
 type Mod interface {
 	Module() string
 	Dependencies() []Module
 }
 
-// File
+// File is a go.mod file.
 type File struct {
 	path string
 	mods []Module
 }
 
-// OpenFile
+// OpenFile tries to open a go.mod file.
 func OpenFile(path string) (*File, error) {
 	if filepath.Base(path) != Filename {
-		return nil, goup.ErrMod
+		return nil, errors.ErrMod
 	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}
 	f, err := modfile.Parse(path, b, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}
 	return &File{
 		path: f.Module.Mod.Path,
@@ -48,12 +49,12 @@ func OpenFile(path string) (*File, error) {
 	}, nil
 }
 
-// Module
+// Module returns the name of the module.
 func (f *File) Module() string {
 	return f.path
 }
 
-// Dependencies
+// Dependencies returns the dependencies of the module.
 func (f *File) Dependencies() []Module {
 	return f.mods
 }

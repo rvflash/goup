@@ -2,11 +2,12 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package mod exposes methods to parse a go.mod file.
 package mod
 
 import "github.com/rvflash/goup/internal/semver"
 
-// Module
+// Module represents a dependency.
 type Module interface {
 	Indirect() bool
 	Path() string

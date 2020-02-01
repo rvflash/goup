@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rvflash/goup"
+	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/mod"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
@@ -39,7 +39,7 @@ type Config struct {
 func File(parent context.Context, file mod.Mod, conf Config) *Updates {
 	up := &Updates{Mod: file}
 	if parent == nil || file == nil {
-		up.must(goup.ErrMod)
+		up.must(errors.ErrMod)
 		return up
 	}
 	ctx, cancel := context.WithTimeout(parent, conf.Timeout)
@@ -66,7 +66,7 @@ func File(parent context.Context, file mod.Mod, conf Config) *Updates {
 // Module
 func Module(ctx context.Context, dep mod.Module, conf Config) (string, error) {
 	if ctx == nil || dep == nil {
-		return "", goup.ErrRepository
+		return "", errors.ErrRepository
 	}
 	if conf.ExcludeIndirect && dep.Indirect() {
 		return skipped(dep), nil
@@ -99,7 +99,7 @@ func Module(ctx context.Context, dep mod.Module, conf Config) (string, error) {
 		}
 		return checked(dep), nil
 	}
-	return "", newError(dep, goup.ErrSystem)
+	return "", newError(dep, errors.ErrSystem)
 }
 
 func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool) {
@@ -127,7 +127,7 @@ func onlyTag(d mod.Module, paths string) error {
 			continue
 		}
 		if strings.Contains(d.Path(), path) && !d.Version().IsTag() {
-			return goup.ErrExpectedTag
+			return errors.ErrExpectedTag
 		}
 	}
 	return nil

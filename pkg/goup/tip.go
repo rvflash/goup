@@ -10,7 +10,7 @@ import (
 	"github.com/rvflash/goup/internal/mod"
 )
 
-// Tip
+// Tip exposes methods to retrieve an order (with Err method) or an advice.
 type Tip interface {
 	Err() error
 	fmt.Stringer

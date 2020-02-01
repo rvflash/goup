@@ -5,12 +5,12 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 	"time"
 
 	"github.com/rvflash/goup/internal/app"
+	"github.com/rvflash/goup/internal/signal"
 )
 
 // Filled by the CI when building.
@@ -32,13 +32,16 @@ func main() {
 	flag.StringVar(&a.OnlyReleases, "r", "", s)
 	s = "maximum time duration"
 	flag.DurationVar(&a.Timeout, "t", timeout, s)
+	// todo
+	//s = "update the go.mod file as advised"
+	//flag.DurationVar(&a.Update, "u", timeout, s)
 	s = "verbose output"
 	flag.BoolVar(&a.Verbose, "v", false, s)
 	s = "print version"
 	flag.BoolVar(&a.Version, "V", false, s)
 	flag.Parse()
 
-	ctx := context.Background()
+	ctx := signal.Background()
 	if !a.Check(ctx, flag.Args()) {
 		os.Exit(1)
 	}

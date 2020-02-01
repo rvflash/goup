@@ -11,7 +11,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// Latest
+// Latest returns the latest tag in the given list of versions.
 func Latest(versions Tags) Tag {
 	switch len(versions) {
 	case 0:
@@ -24,7 +24,7 @@ func Latest(versions Tags) Tag {
 	}
 }
 
-// LatestMinor
+// LatestMinor returns the latest minor version of the given major.
 func LatestMinor(major string, versions Tags) Tag {
 	if major == "" || len(versions) == 0 {
 		return nil
@@ -40,7 +40,7 @@ func LatestMinor(major string, versions Tags) Tag {
 	return latest
 }
 
-// LatestPatch
+// LatestPatch returns the latest version with this major and minor.
 func LatestPatch(majorMinor string, versions Tags) Tag {
 	if majorMinor == "" || len(versions) == 0 {
 		return nil
@@ -56,7 +56,12 @@ func LatestPatch(majorMinor string, versions Tags) Tag {
 	return latest
 }
 
-// Compare
+// Compare returns an integer comparing two versions according to
+// semantic version precedence.
+// The result will be 0 if v == w, -1 if v < w, or +1 if v > w.
+//
+// An invalid semantic version string is considered less than a valid one.
+// All invalid semantic version strings compare equal to each other.
 func Compare(v, w fmt.Stringer) int {
 	if v == nil || w == nil {
 		return 0

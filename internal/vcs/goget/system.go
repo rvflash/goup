@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rvflash/goup"
+	errors2 "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
@@ -60,22 +60,22 @@ func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) 
 
 func (s *System) fetchURL(ctx context.Context, system, url string) (semver.Tags, error) {
 	if s.git == nil {
-		return nil, goup.ErrSystem
+		return nil, errors2.ErrSystem
 	}
 	switch system {
 	case git.Name:
 		return s.git.FetchURL(ctx, url)
 	default:
-		return nil, goup.ErrSystem
+		return nil, errors2.ErrSystem
 	}
 }
 
 func (s *System) vcsByURL(ctx context.Context, url string) (vcs, remote string, err error) {
 	if ctx == nil || s.client == nil {
-		return "", "", goup.ErrSystem
+		return "", "", errors2.ErrSystem
 	}
 	if url == "" {
-		return "", "", goup.ErrRepository
+		return "", "", errors2.ErrRepository
 	}
 	var req *http.Request
 	req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -93,7 +93,7 @@ func (s *System) vcsByURL(ctx context.Context, url string) (vcs, remote string, 
 
 func (s *System) vcsByPath(ctx context.Context, path string) (vcs, remote string, err error) {
 	if path == "" {
-		return "", "", goup.ErrRepository
+		return "", "", errors2.ErrRepository
 	}
 	for _, protocol := range []string{"https://", "http://"} {
 		vcs, remote, err = s.vcsByURL(ctx, protocol+path)
@@ -152,7 +152,7 @@ func charsetReader(charset string, input io.Reader) (io.Reader, error) {
 	case utf8Charset, asciiCharset:
 		return input, nil
 	default:
-		return nil, goup.Errorf(Name, errors.New("charset: "+charset))
+		return nil, vcs.Errorf(Name, errors.New("unsupported charset: "+charset))
 	}
 }
 

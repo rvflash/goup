@@ -5,12 +5,25 @@
 package semver_test
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/semver"
 )
+
+var (
+	v0 = semver.New("v2.2.13")
+	v1 = semver.New("v2.2.12-beta")
+	v2 = semver.New("v2.2.12")
+	v3 = semver.New("v1.2.12+incompatible")
+	v4 = semver.New("v0.2.12")
+	v5 = semver.New("v1.2.13")
+)
+
+func tags() semver.Tags {
+	return semver.Tags{v0, v1, v2, v3, v4, v5}
+}
 
 func TestNew(t *testing.T) {
 	var (
@@ -19,6 +32,7 @@ func TestNew(t *testing.T) {
 			in         string
 			out        string
 			canonical  string
+			tag        bool
 			valid      bool
 			major      string
 			majorMinor string
@@ -26,13 +40,14 @@ func TestNew(t *testing.T) {
 			build      string
 		}{
 			"1.2.0": {in: "1.2.0"},
-			"v1.2.0": {
-				in:         "v1.2.0",
-				out:        "v1.2.0",
-				canonical:  "v1.2.0",
+			"gopls/v1.2.12": {
+				in:         "gopls/v1.2.12",
+				out:        "gopls/v1.2.12",
+				canonical:  "v1.2.12",
 				major:      "v1",
 				majorMinor: "v1.2",
 				valid:      true,
+				tag:        true,
 			},
 			"v1.2.12": {
 				in:         "v1.2.12",
@@ -41,6 +56,7 @@ func TestNew(t *testing.T) {
 				major:      "v1",
 				majorMinor: "v1.2",
 				valid:      true,
+				tag:        true,
 			},
 			"v0.2.1-0.20200121190230-accd165b1659": {
 				in:         "v0.2.1-0.20200121190230-accd165b1659",
@@ -66,6 +82,7 @@ func TestNew(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			out := semver.New(tt.in)
+			are.Equal(out.IsTag(), tt.tag)             // mismatch tag
 			are.Equal(out.IsValid(), tt.valid)         // mismatch validity
 			are.Equal(out.Major(), tt.major)           // mismatch major
 			are.Equal(out.MajorMinor(), tt.majorMinor) // mismatch major minor
@@ -75,4 +92,15 @@ func TestNew(t *testing.T) {
 			are.Equal(out.String(), tt.out)            // mismatch raw
 		})
 	}
+}
+
+func TestTags_Len(t *testing.T) {
+	var (
+		are  = is.New(t)
+		list semver.Tags
+	)
+	list = tags()
+	sort.Sort(list)
+	are.Equal(list.Len(), 6)
+	are.Equal(list, semver.Tags{v4, v3, v5, v1, v2, v0})
 }

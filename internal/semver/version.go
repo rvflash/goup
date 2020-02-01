@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package semver implements comparison of semantic version strings.
 package semver
 
 import (
@@ -10,11 +11,6 @@ import (
 
 	"golang.org/x/mod/semver"
 )
-
-// IsTag
-func IsTag(version string) bool {
-	return New(version).IsTag()
-}
 
 // Tags
 type Tags []Tag
@@ -99,7 +95,7 @@ func (v Version) IsValid() bool {
 
 // IsTag implements the Tag interface.
 func (v Version) IsTag() bool {
-	return v.build == "" && v.prerelease == ""
+	return v.canonical != "" && v.build == "" && v.prerelease == ""
 }
 
 // Major implements the Tag interface.
