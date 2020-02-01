@@ -54,9 +54,24 @@ func (s *System) FetchContext(ctx context.Context, path string) (semver.Tags, er
 	}
 }
 
+type transport struct {
+	protocol  string
+	extension string
+}
+
+// URL
+func (t transport) URL(path string) string {
+	return t.protocol + path + t.extension
+}
+
 func (s *System) fetchWithRetry(path string) (ref *reference) {
-	for _, protocol := range []string{"https://", "http://"} {
-		ref = s.fetch(protocol, path)
+	for _, t := range []transport{
+		// {protocol: "git://", extension: ".git"},
+		// {protocol: "ssh://git@"},
+		{protocol: "https://"},
+		{protocol: "http://"},
+	} {
+		ref = s.fetch(t.URL(path))
 		if ref.err == nil {
 			break
 		}
@@ -64,19 +79,19 @@ func (s *System) fetchWithRetry(path string) (ref *reference) {
 	return
 }
 
-func (s *System) fetch(protocol, path string) (ref *reference) {
+func (s *System) fetch(url string) (ref *reference) {
 	ref = new(reference)
 	if s.storage == nil {
 		ref.err = goup.Errorf("git", goup.ErrSystem)
 		return
 	}
-	if protocol == "" || path == "" {
+	if url == "" {
 		ref.err = goup.Errorf("git", goup.ErrRepository)
 		return
 	}
 	rem := git.NewRemote(s.storage, &config.RemoteConfig{
 		Name: "origin",
-		URLs: []string{protocol + path},
+		URLs: []string{url},
 	})
 	res, err := rem.List(&git.ListOptions{})
 	if err != nil {

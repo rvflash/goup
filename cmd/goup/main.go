@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"time"
@@ -37,7 +38,8 @@ func main() {
 	flag.BoolVar(&a.Version, "V", false, s)
 	flag.Parse()
 
-	if !a.Check(flag.Args()) {
+	ctx := context.Background()
+	if !a.Check(ctx, append([]string{"/mnt/data/go/src/github.com/rvflash/goup/go.mod"}, flag.Args()...)) {
 		os.Exit(1)
 	}
 }

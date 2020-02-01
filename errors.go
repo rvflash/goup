@@ -9,22 +9,24 @@ import (
 	"strings"
 )
 
-type errVCS string
+type errUp string
 
-// Error
-func (e errVCS) Error() string {
+// Error implements the error interface.
+func (e errUp) Error() string {
 	return string(e)
 }
 
 const (
+	// ErrExpectedTag
+	ErrExpectedTag = errUp("release tag expected")
 	// ErrMod
-	ErrMod = errVCS("invalid go.mod")
+	ErrMod = errUp("invalid go.mod")
 	// Err1System
-	ErrSystem = errVCS("invalid VCS")
+	ErrSystem = errUp("invalid VCS")
 	// ErrRepository
-	ErrRepository = errVCS("invalid repository")
+	ErrRepository = errUp("invalid repository")
 	// ErrFetch
-	ErrFetch = errVCS("failed to list tags")
+	ErrFetch = errUp("failed to list tags")
 )
 
 // Errorf
