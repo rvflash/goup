@@ -22,8 +22,8 @@ import (
 // Name is the name of this VCS.
 const Name = "git"
 
-// System is a Git Version Control System.
-type System struct {
+// VCS is a Git Version Control VCS.
+type VCS struct {
 	storage storage.Storer
 }
 
@@ -32,18 +32,18 @@ type reference struct {
 	err  error
 }
 
-// New returns a new instance of System.
-func New() *System {
-	return &System{storage: memory.NewStorage()}
+// New returns a new instance of VCS.
+func New() *VCS {
+	return &VCS{storage: memory.NewStorage()}
 }
 
-// CanFetch implements the vcs.System interface.
-func (s *System) CanFetch(_ string) bool {
+// CanFetch implements the vcs.VCS interface.
+func (s *VCS) CanFetch(_ string) bool {
 	return true
 }
 
-// FetchPath implements the vcs.System interface.
-func (s *System) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
+// FetchPath implements the vcs.VCS interface.
+func (s *VCS) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
 	if ctx == nil || s.storage == nil {
 		return nil, errors.ErrSystem
 	}
@@ -65,8 +65,8 @@ func (s *System) FetchPath(ctx context.Context, path string) (semver.Tags, error
 	}
 }
 
-// FetchURL implements the vcs.System interface.
-func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
+// FetchURL implements the vcs.VCS interface.
+func (s *VCS) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
 	if ctx == nil || s.storage == nil {
 		return nil, errors.ErrSystem
 	}
@@ -98,7 +98,7 @@ func (t transport) URL(path string) string {
 	return t.protocol + path + t.extension
 }
 
-func (s *System) fetchWithRetry(path string) (ref *reference) {
+func (s *VCS) fetchWithRetry(path string) (ref *reference) {
 	for _, t := range []transport{
 		// {protocol: "git://", extension: ".git"},
 		// {protocol: "ssh://git@"},
@@ -113,7 +113,7 @@ func (s *System) fetchWithRetry(path string) (ref *reference) {
 	return
 }
 
-func (s *System) fetch(url string) (ref *reference) {
+func (s *VCS) fetch(url string) (ref *reference) {
 	ref = new(reference)
 	rem := git.NewRemote(s.storage, &config.RemoteConfig{
 		Name: "origin",

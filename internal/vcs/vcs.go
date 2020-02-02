@@ -18,6 +18,7 @@ import (
 type System interface {
 	CanFetch(path string) bool
 	FetchPath(ctx context.Context, path string) (semver.Tags, error)
+	FetchURL(ctx context.Context, url string) (semver.Tags, error)
 }
 
 // HTTPClient represents a HTTP Client.

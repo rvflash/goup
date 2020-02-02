@@ -5,6 +5,13 @@
 // Package errors exposes the errors used by the GoUp app.
 package errors
 
+import "errors"
+
+// NewCharset returns a new charset's error.
+func NewCharset(charset string) error {
+	return errors.New("unsupported charset:" + charset)
+}
+
 type errUp string
 
 // Error implements the error interface.
