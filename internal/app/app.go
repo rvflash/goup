@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package app manages the GoUp app.
 package app
 
 import (
@@ -16,7 +17,7 @@ import (
 
 const prefix = "goup: "
 
-// New
+// New creates a new instance of App.
 func New(version string) *App {
 	return &App{
 		buildVersion: version,
@@ -25,7 +26,7 @@ func New(version string) *App {
 	}
 }
 
-// App
+// App represents an application.
 type App struct {
 	goup.Config
 
@@ -33,7 +34,7 @@ type App struct {
 	buildVersion  string
 }
 
-// Check
+// Check launches the analyses of given paths.
 func (a *App) Check(ctx context.Context, paths []string) bool {
 	if a.Version {
 		a.errorf("version %s\n", a.buildVersion)

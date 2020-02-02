@@ -20,7 +20,7 @@ func TestTip(t *testing.T) {
 			msg string
 		}{
 			"default": {tip: &tip{}},
-			"default": {tip: &tip{err: newError()}},
+			//"default": {tip: &tip{err: newError()}},
 		}
 	)
 	for name, tt := range dt {

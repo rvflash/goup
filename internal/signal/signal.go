@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package signal provides methods to listen OS signal and attaches them to context.
 package signal
 
 import (

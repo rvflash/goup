@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package goget provides methods to deal with go get as VCS.
 package goget
 
 import (
@@ -21,13 +22,13 @@ import (
 // Name is the name of this VCS.
 const Name = "go-get"
 
-// System
+// System is a go get system.
 type System struct {
 	client vcs.HTTPClient
 	git    *git.System
 }
 
-// New
+// New creates a new instance of System.
 func New(client vcs.HTTPClient, git *git.System) *System {
 	return &System{
 		client: client,
@@ -120,8 +121,9 @@ func parseMetaGoImport(r io.Reader) (vcs, url string, err error) {
 	d := xml.NewDecoder(r)
 	d.CharsetReader = charsetReader
 	d.Strict = false
+	var t xml.Token
 	for {
-		t, err := d.RawToken()
+		t, err = d.RawToken()
 		if err != nil {
 			break
 		}

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
+
 	uperr "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/mod"
 )
@@ -26,9 +27,9 @@ func TestOpen(t *testing.T) {
 			"default":        {err: uperr.ErrMod},
 			"invalid name":   {in: []string{"testdata"}, err: uperr.ErrMod},
 			"invalid path":   {in: []string{"testdata", mod.Filename}, err: uperr.ErrMod},
-			"invalid go.mod": {in: []string{"..", "..", "testdata", "invalid", mod.Filename}, err: uperr.ErrMod},
+			"invalid go.mod": {in: []string{"..", "..", "testdata", "gomod", "invalid", mod.Filename}, err: uperr.ErrMod},
 			"valid go.mod": {
-				in:     []string{"..", "..", "testdata", "valid", mod.Filename},
+				in:     []string{"..", "..", "testdata", "gomod", "valid", mod.Filename},
 				module: "github.com/rvflash/goup",
 				depLen: 4,
 			},

@@ -59,24 +59,19 @@ func (f *File) Dependencies() []Module {
 	return f.mods
 }
 
+// Firstly we get the modules used to replace legacy ones.
+// Then those required. We use the replace dependency instead of this required.
 func dependencies(f *modfile.File) []Module {
-	if f == nil {
-		return nil
-	}
-	m := make(map[string]Module)
-
-	// Firstly we get the modules used to replace legacy ones.
+	var m = make(map[string]Module)
 	for _, r := range f.Replace {
 		m[r.Old.Path] = &module{
 			path:    r.New.Path,
 			version: semver.New(r.New.Version),
 		}
 	}
-	// Then those required.
 	for _, r := range f.Require {
 		_, ok := m[r.Mod.Path]
 		if ok {
-			// Use the replace dependency instead of this one.
 			continue
 		}
 		m[r.Mod.Path] = &module{

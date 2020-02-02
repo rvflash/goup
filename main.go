@@ -16,7 +16,10 @@ import (
 // Filled by the CI when building.
 var buildVersion string
 
-const timeout = 10 * time.Second
+const (
+	errorCode = 1
+	timeout   = 10 * time.Second
+)
 
 func main() {
 	a := app.New(buildVersion)
@@ -32,7 +35,7 @@ func main() {
 	flag.StringVar(&a.OnlyReleases, "r", "", s)
 	s = "maximum time duration"
 	flag.DurationVar(&a.Timeout, "t", timeout, s)
-	// todo
+	// todo in the next release
 	//s = "update the go.mod file as advised"
 	//flag.DurationVar(&a.Update, "u", timeout, s)
 	s = "verbose output"
@@ -43,6 +46,6 @@ func main() {
 
 	ctx := signal.Background()
 	if !a.Check(ctx, flag.Args()) {
-		os.Exit(1)
+		os.Exit(errorCode)
 	}
 }

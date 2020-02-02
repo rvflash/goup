@@ -12,7 +12,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// Tags
+// Tags represents a list of versions that can be sorted.
 type Tags []Tag
 
 // Len implements the sort interface.New
@@ -30,7 +30,7 @@ func (t Tags) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
 }
 
-// Tag
+// Tag represents a version.
 type Tag interface {
 	Build() string
 	Canonical() string
@@ -42,7 +42,7 @@ type Tag interface {
 	fmt.Stringer
 }
 
-// New
+// New returns a new instance of Version.
 func New(version string) *Version {
 	var (
 		v = new(Version)
@@ -68,7 +68,7 @@ func trim(s string) string {
 	return s
 }
 
-// Version
+// Version represents a semantic version.
 type Version struct {
 	raw        string
 	canonical  string

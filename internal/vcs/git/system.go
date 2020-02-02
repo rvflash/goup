@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package git provides methods to handle Git.
 package git
 
 import (
@@ -21,7 +22,7 @@ import (
 // Name is the name of this VCS.
 const Name = "git"
 
-// System
+// System is a Git Version Control System.
 type System struct {
 	storage storage.Storer
 }
@@ -31,37 +32,14 @@ type reference struct {
 	err  error
 }
 
-// New
+// New returns a new instance of System.
 func New() *System {
 	return &System{storage: memory.NewStorage()}
 }
 
-// CanCanFetch implements the vcs.System interface.
+// CanFetch implements the vcs.System interface.
 func (s *System) CanFetch(_ string) bool {
 	return true
-}
-
-// FetchURL implements the vcs.System interface.
-func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
-	if ctx == nil || s.storage == nil {
-		return nil, errors.ErrSystem
-	}
-	if url == "" {
-		return nil, errors.ErrRepository
-	}
-	var c = make(chan *reference, 1)
-	go func() {
-		c <- s.fetch(url)
-	}()
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case ref := <-c:
-		if err := ref.err; err != nil {
-			return nil, err
-		}
-		return ref.list, nil
-	}
 }
 
 // FetchPath implements the vcs.System interface.
@@ -87,12 +65,35 @@ func (s *System) FetchPath(ctx context.Context, path string) (semver.Tags, error
 	}
 }
 
+// FetchURL implements the vcs.System interface.
+func (s *System) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
+	if ctx == nil || s.storage == nil {
+		return nil, errors.ErrSystem
+	}
+	if url == "" {
+		return nil, errors.ErrRepository
+	}
+	var c = make(chan *reference, 1)
+	go func() {
+		c <- s.fetch(url)
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case ref := <-c:
+		if err := ref.err; err != nil {
+			return nil, err
+		}
+		return ref.list, nil
+	}
+}
+
 type transport struct {
 	protocol  string
 	extension string
 }
 
-// URL
+// URL builds and returns a URL based on transport data and the given path.
 func (t transport) URL(path string) string {
 	return t.protocol + path + t.extension
 }

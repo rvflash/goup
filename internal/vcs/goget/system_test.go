@@ -20,5 +20,4 @@ func TestNew(t *testing.T) {
 	rs, err := s.FetchPath(context.Background(), "golang.org/x/tools")
 	fmt.Println(err)
 	fmt.Println(rs[5].String())
-
 }

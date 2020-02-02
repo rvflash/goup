@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Errorf
+// Errorf returns a new error message by combining various errors with the name of the VCS as prefix.
 func Errorf(vcs string, a ...interface{}) error {
 	const (
 		base = "%s: %w"

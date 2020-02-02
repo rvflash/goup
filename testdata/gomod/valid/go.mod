@@ -8,3 +8,5 @@ require (
 	golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659
 	gopkg.in/src-d/go-git.v4 v4.13.1
 )
+
+replace github.com/matryer/is => example.com/c v1.0.0

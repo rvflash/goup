@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package goup provides methods to check updates on go.mod file and modules.
 package goup
 
 import (
@@ -18,24 +19,21 @@ import (
 	"github.com/rvflash/goup/internal/vcs/goget"
 )
 
-// Checker
-type Checker interface {
-	Tips() []Tip
-}
-
-// Config
+// Config is used as the settings of the GoUp application.
 type Config struct {
+	ExcludeIndirect bool
 	Fast            bool
 	Major           bool
 	MajorMinor      bool
-	OnlyReleases    string
-	ExcludeIndirect bool
-	Timeout         time.Duration
 	Verbose         bool
 	Version         bool
+	OnlyReleases    string
+	Timeout         time.Duration
 }
 
-// File
+const delta = 1
+
+// File checks the given go.mod file based on this configuration.
 func File(parent context.Context, file mod.Mod, conf Config) *Updates {
 	up := &Updates{Mod: file}
 	if parent == nil || file == nil {
@@ -47,7 +45,7 @@ func File(parent context.Context, file mod.Mod, conf Config) *Updates {
 
 	var w8 sync.WaitGroup
 	for _, d := range file.Dependencies() {
-		w8.Add(1)
+		w8.Add(delta)
 		go func(d mod.Module) {
 			defer w8.Done()
 			adv, err := Module(ctx, d, conf)
@@ -63,7 +61,7 @@ func File(parent context.Context, file mod.Mod, conf Config) *Updates {
 	return up
 }
 
-// Module
+// Module checks the version of the given module based on this configuration.
 func Module(ctx context.Context, dep mod.Module, conf Config) (string, error) {
 	if ctx == nil || dep == nil {
 		return "", errors.ErrRepository
@@ -133,7 +131,7 @@ func onlyTag(d mod.Module, paths string) error {
 	return nil
 }
 
-// Updates
+// Updates contains any information about go.mod updates.
 type Updates struct {
 	mod.Mod
 
@@ -141,7 +139,7 @@ type Updates struct {
 	tips []Tip
 }
 
-// Tips
+// Tips returns all updates messages.
 func (up *Updates) Tips() []Tip {
 	up.mu.RLock()
 	defer up.mu.RLock()

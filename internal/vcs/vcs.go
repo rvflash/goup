@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package vcs exposes interfaces and methods implemented by a VCS.
 package vcs
 
 import (
@@ -13,28 +14,33 @@ import (
 	"github.com/rvflash/goup/internal/semver"
 )
 
-// System
+// System must be implemented by any VCS.
 type System interface {
 	CanFetch(path string) bool
 	FetchPath(ctx context.Context, path string) (semver.Tags, error)
 }
 
-// HTTPClient
+// HTTPClient represents a HTTP Client.
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// NewHTTPClient
+const (
+	keepAlive       = 30 * time.Second
+	continueTimeout = 1 * time.Second
+)
+
+// NewHTTPClient returns a new instance of HTTP client.
 func NewHTTPClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			DialContext: (&net.Dialer{
 				Timeout:   timeout,
-				KeepAlive: 30 * time.Second,
+				KeepAlive: keepAlive,
 			}).DialContext,
 			TLSHandshakeTimeout:   timeout,
 			ResponseHeaderTimeout: timeout,
-			ExpectContinueTimeout: 1 * time.Second,
+			ExpectContinueTimeout: continueTimeout,
 		},
 	}
 }
