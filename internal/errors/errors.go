@@ -5,11 +5,19 @@
 // Package errors exposes the errors used by the GoUp app.
 package errors
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // NewCharset returns a new charset's error.
 func NewCharset(charset string) error {
 	return errors.New("unsupported charset:" + charset)
+}
+
+// NewMissingData returns the data is missing.
+func NewMissingData(name string) error {
+	return fmt.Errorf("%s: %w", name, ErrMissing)
 }
 
 type errUp string
@@ -22,6 +30,8 @@ func (e errUp) Error() string {
 const (
 	// ErrExpectedTag is returned when the version is not a release tag.
 	ErrExpectedTag = errUp("release tag expected")
+	// ErrMissing is returned when the data is missing.
+	ErrMissing = errUp("missing data")
 	// ErrMod is returned when the go.mod file is invalid.
 	ErrMod = errUp("invalid go.mod")
 	// ErrSystem is returned when the VCS does not respond to the remote request.

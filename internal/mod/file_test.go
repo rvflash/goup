@@ -38,7 +38,7 @@ func TestOpen(t *testing.T) {
 	for name, tt := range dt {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
-			out, err := mod.OpenFile(filepath.Join(tt.in...))
+			out, err := mod.Parse(filepath.Join(tt.in...))
 			are.True(errors.Is(err, tt.err)) // mismatch error
 			if tt.err == nil {
 				are.Equal(out.Module(), tt.module)            // mismatch module

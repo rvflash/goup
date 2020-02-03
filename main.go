@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"time"
 
@@ -22,7 +23,11 @@ const (
 )
 
 func main() {
-	a := app.New(buildVersion)
+	a, err := app.Open(buildVersion)
+	if err != nil {
+		log.SetPrefix(app.LogPrefix)
+		log.Fatal(err)
+	}
 	s := "exclude indirect modules"
 	flag.BoolVar(&a.ExcludeIndirect, "i", false, s)
 	s = "exit on first error occurred"

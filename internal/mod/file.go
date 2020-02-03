@@ -18,6 +18,9 @@ import (
 // Filename is the name of Go Module file.
 const Filename = "go.mod"
 
+// Parser defined the interface used to parse a go.mod file.
+type Parser func(path string) (*File, error)
+
 // Mod represents a Go Module file.
 type Mod interface {
 	Module() string
@@ -30,8 +33,8 @@ type File struct {
 	mods []Module
 }
 
-// OpenFile tries to open a go.mod file.
-func OpenFile(path string) (*File, error) {
+// Parse tries to open a go.mod file.
+func Parse(path string) (*File, error) {
 	if filepath.Base(path) != Filename {
 		return nil, errors.ErrMod
 	}
