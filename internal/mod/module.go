@@ -30,7 +30,7 @@ func (m *module) Path() string {
 	return m.path
 }
 
-// Version implements the Module interface.
+// PrintVersion implements the Module interface.
 func (m *module) Version() semver.Tag {
 	return m.version
 }

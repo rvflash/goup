@@ -42,7 +42,7 @@ type Tag interface {
 	fmt.Stringer
 }
 
-// New returns a new instance of Version.
+// New returns a new instance of PrintVersion.
 func New(version string) *Version {
 	var (
 		v = new(Version)

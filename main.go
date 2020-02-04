@@ -31,7 +31,7 @@ func main() {
 	s := "exclude indirect modules"
 	flag.BoolVar(&a.ExcludeIndirect, "i", false, s)
 	s = "exit on first error occurred"
-	flag.BoolVar(&a.Fast, "f", false, s)
+	flag.BoolVar(&a.Strict, "s", false, s)
 	s = "ensure to have the latest major version"
 	flag.BoolVar(&a.Major, "M", false, s)
 	s = "ensure to have the latest couple major with minor version"
@@ -41,12 +41,12 @@ func main() {
 	s = "maximum time duration"
 	flag.DurationVar(&a.Timeout, "t", timeout, s)
 	// todo in the next release
-	//s = "update the go.mod file as advised"
-	//flag.DurationVar(&a.Update, "u", timeout, s)
+	//s = "force the update of the go.mod file as advised"
+	//flag.BoolVar(&a.Force, "f", false, s)
 	s = "verbose output"
 	flag.BoolVar(&a.Verbose, "v", false, s)
 	s = "print version"
-	flag.BoolVar(&a.Version, "V", false, s)
+	flag.BoolVar(&a.PrintVersion, "V", false, s)
 	flag.Parse()
 
 	ctx := signal.Background()

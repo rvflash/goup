@@ -22,7 +22,7 @@ import (
 // Name is the name of this VCS.
 const Name = "git"
 
-// VCS is a Git Version Control VCS.
+// VCS is a Git PrintVersion Control VCS.
 type VCS struct {
 	storage storage.Storer
 }

@@ -103,7 +103,7 @@ type App struct {
 
 // Check launches the analyses of given paths.
 func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
-	if a.Version {
+	if a.PrintVersion {
 		a.errorf("version %s\n", a.buildVersion)
 		if len(paths) == 0 {
 			// Default behavior: without specified path, nothing else to do.

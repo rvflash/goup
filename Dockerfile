@@ -30,12 +30,12 @@ RUN GOOS=linux GOARCH=amd64 GO111MODULE=on CGO_ENABLED=0 go build \
 # Run the binary
 FROM scratch
 
-##  Certificates and privileges
+## Certificates and privileges
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 USER goup
 
-## Finally
+## Finally exposes the command line tool
 COPY --from=builder /app/bin/goup /bin/goup
 WORKDIR /pkg
-ENTRYPOINT ["/bin/goup"]
+CMD ["/bin/goup"]
