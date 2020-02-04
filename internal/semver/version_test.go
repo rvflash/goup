@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
+
 	"github.com/rvflash/goup/internal/semver"
 )
 
@@ -103,4 +104,17 @@ func TestTags_Len(t *testing.T) {
 	sort.Sort(list)
 	are.Equal(list.Len(), 6)
 	are.Equal(list, semver.Tags{v4, v3, v5, v1, v2, v0})
+}
+
+func TestTags_Not(t *testing.T) {
+	var (
+		in  = tags()
+		are = is.New(t)
+	)
+	out := in.Not(semver.New("v8.0.1"))
+	are.Equal(6, len(out)) // expected no change
+	out = in.Not(semver.New("v2.2.12"))
+	are.Equal(5, len(out)) // mismatch result
+	out = out.Not(semver.New("v1.2.13"))
+	are.Equal(4, len(out)) // mismatch result
 }

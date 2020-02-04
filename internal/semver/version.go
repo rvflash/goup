@@ -15,6 +15,23 @@ import (
 // Tags represents a list of versions that can be sorted.
 type Tags []Tag
 
+// Not removes from the list of tags the given tag.
+func (t Tags) Not(w fmt.Stringer) Tags {
+	key := func(t Tags) int {
+		for k, v := range t {
+			if Compare(v, w) == 0 {
+				return k
+			}
+		}
+		return -1
+	}
+	i := key(t)
+	if i < 0 {
+		return t
+	}
+	return append(t[:i], t[i+1:]...)
+}
+
 // Len implements the sort interface.New
 func (t Tags) Len() int {
 	return len(t)

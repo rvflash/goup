@@ -19,6 +19,7 @@ It parses `go.mod` files to get dependencies with their used version and uses [g
 1. As `go.mod` uses the semantic versioning for module version, `goup` does the same and provides 3 modes: major, major+minor and by default, path. 
 1. Takes care of each part of a mod file: `require`, `exclude` and `replace`.
 1. Allows the capacity to force some module to only use release tag, no prerelease.
+1. Manages one or more `go.mod` files with `./...` as parameter. 
 
 
 ## Installation
@@ -41,6 +42,10 @@ docker run --rm -v $(pwd):/pkg rvflash/goup:v0.1.0 goup -V
 
 ## Usage
 
+```shell script
+goup [flags] [modfiles]
+```
+
 The `goup` command is used to check updates of any dependencies in the go.mod file.
 It supports the following flags:
 
@@ -53,6 +58,8 @@ For example with `gitlab` as value, any modules with this word in the path must 
 * `-s`: forces the process to exit on first error occurred.
 * `-t`: defines the maximum time duration to perform the check. By default: 10s. 
 * `-v`: verbose output
+
+`[modfiles]` can be one or more direct path to `go.mod` files, `.` or `./...` to get all those in the tree.
 
 
 ## Soon
