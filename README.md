@@ -62,6 +62,16 @@ For example with `gitlab` as value, any modules with this word in the path must 
 `[modfiles]` can be one or more direct path to `go.mod` files, `.` or `./...` to get all those in the tree.
 
 
+## Demo
+
+```shell script
+$ goup -v -m ./...
+$ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 not to update
+$ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated with v1.2.0
+$ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 not to update
+$ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 not to update
+```
+
 ## Soon
 
 An option `-f` will be available to force updates of the go.mod file as recommended.
