@@ -19,7 +19,7 @@ It parses `go.mod` files to get dependencies with their used version and uses [g
 1. As `go.mod` uses the semantic versioning for module version, `goup` does the same and provides 3 modes: major, major+minor and by default, path. 
 1. Takes care of each part of a mod file: `require`, `exclude` and `replace`.
 1. Allows the capacity to force some module to only use release tag, no prerelease.
-1. Manages one or more `go.mod` files with `./...` as parameter. 
+1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
 
 
 ## Installation
