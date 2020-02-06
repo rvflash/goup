@@ -7,10 +7,10 @@
 
 
 `goup` checks if there are any updates for imports in your module.
-It parses `go.mod` files to get dependencies with their used version and uses [go-git](https://github.com/src-d/go-git) to list remote tags. 
+It parses `go.mod` files to get dependencies with their version, uses [go-git](https://github.com/src-d/go-git) to retrieve the list of remote tags and performs comparisons to advise to update if necessary.
 
 > For now, it doesn't update the go mod file. An option to force it is planned but for the moment,
-> the main purpose is using it as a linter.
+> the main purpose is using it as a linter in continuous integration or in development process.
 
 
 ## Features
@@ -18,8 +18,19 @@ It parses `go.mod` files to get dependencies with their used version and uses [g
 1. No dependency. Pure Go tool designed to be used as a linter. Zero call to `go` or `git` command line tools.
 1. As `go.mod` uses the semantic versioning for module version, `goup` does the same and provides 3 modes: major, major+minor and by default, path. 
 1. Takes care of each part of a mod file: `require`, `exclude` and `replace`.
-1. Allows the capacity to force some module to only use release tag, no prerelease.
+1. Allows the capacity to force some modules to only use release tag, no prerelease.
 1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
+
+
+## Demo
+
+```shell script
+$ goup -v -m ./...
+$ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 not to update
+$ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated with v1.2.0
+$ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 not to update
+$ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 not to update
+```
 
 
 ## Installation
@@ -61,16 +72,6 @@ For example with `gitlab` as value, any modules with this word in the path must 
 
 `[modfiles]` can be one or more direct path to `go.mod` files, `.` or `./...` to get all those in the tree.
 
-
-## Demo
-
-```shell script
-$ goup -v -m ./...
-$ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 not to update
-$ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated with v1.2.0
-$ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 not to update
-$ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 not to update
-```
 
 ## Soon
 
