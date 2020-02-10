@@ -11,29 +11,28 @@ import (
 	"github.com/rvflash/goup/internal/mod"
 )
 
-// Updates contains any information about go.mod updates.
-type Updates struct {
+// updates contains any information about go.mod updates.
+type updates struct {
 	mod.Mod
 
-	mu   sync.RWMutex
-	tips []Tip
+	mu sync.RWMutex
+	rs []Tip
 }
 
-// Tips returns all updates messages.
-func (up *Updates) Tips() []Tip {
+func (up *updates) tips() []Tip {
 	up.mu.RLock()
 	defer up.mu.RLock()
-	return up.tips
+	return up.rs
 }
 
-func (up *Updates) could(s string) {
+func (up *updates) could(s string) {
 	up.mu.Lock()
-	up.tips = append(up.tips, &tip{msg: s})
+	up.rs = append(up.rs, &tip{msg: s})
 	up.mu.Unlock()
 }
 
-func (up *Updates) must(err error) {
+func (up *updates) must(err error) {
 	up.mu.Lock()
-	up.tips = append(up.tips, &tip{err: err})
+	up.rs = append(up.rs, &tip{err: err})
 	up.mu.Unlock()
 }

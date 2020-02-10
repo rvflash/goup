@@ -80,7 +80,7 @@ func Open(version string, opts ...Configurator) (*App, error) {
 		WithErrOutput(os.Stderr),
 		WithOutput(os.Stdin),
 		WithParser(mod.Parse),
-		WithChecker(goup.GoUp{}),
+		WithChecker(goup.CheckFile),
 	}, opts...)
 	for _, opt := range opts {
 		err := opt(a)
@@ -103,21 +103,25 @@ type App struct {
 
 // Check launches the analyses of given paths.
 func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
+	if !a.ready(ctx) {
+		a.errorf("%s\n", context.Canceled)
+		return true
+	}
 	if a.PrintVersion {
 		a.errorf("version %s\n", a.buildVersion)
 		if len(paths) == 0 {
-			// Default behavior: without specified path, nothing else to do.
+			// Without explicit path: nothing else to do.
 			return
 		}
 	}
 	for _, path := range checkPaths(paths) {
 		f, err := a.parse(path)
 		if err != nil {
+			a.errorf("%s\n", err.Error())
 			return true
 		}
-		for _, tip := range a.check.CheckFile(ctx, f, a.Config).Tips() {
-			err := tip.Err()
-			if err != nil {
+		for _, tip := range a.check(ctx, f, a.Config) {
+			if err = tip.Err(); err != nil {
 				a.errorf("%s: %s\n", f.Module(), err.Error())
 				failure = true
 			} else {
@@ -140,6 +144,10 @@ func (a *App) printf(format string, v ...interface{}) {
 		return
 	}
 	a.stdin.Printf(format, v...)
+}
+
+func (a *App) ready(ctx context.Context) bool {
+	return ctx != nil && a.check != nil && a.parse != nil
 }
 
 const (

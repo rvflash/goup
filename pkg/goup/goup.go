@@ -19,12 +19,7 @@ import (
 )
 
 // Checker must be implemented to check updates on go mod file or module.
-type Checker interface {
-	// CheckFile verifies the given go.mod file based on this configuration.
-	CheckFile(ctx context.Context, file mod.Mod, conf Config) *Updates
-	// CheckModule checks the version of the given module based on this configuration.
-	CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error)
-}
+type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
 
 // Config is used as the settings of the GoUp application.
 type Config struct {
@@ -39,17 +34,14 @@ type Config struct {
 	Timeout         time.Duration
 }
 
-// GoUp represents a go mod checker.
-type GoUp struct{}
-
 const delta = 1
 
-// CheckFile implements the Checker interface.
-func (u GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) *Updates {
-	up := &Updates{Mod: file}
+// CheckFile verifies the given go.mod file based on this configuration.
+func CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
+	up := &updates{Mod: file}
 	if parent == nil || file == nil {
 		up.must(errors.ErrMod)
-		return up
+		return nil
 	}
 	ctx, cancel := context.WithTimeout(parent, conf.Timeout)
 	defer cancel()
@@ -59,7 +51,7 @@ func (u GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) *Upda
 		w8.Add(delta)
 		go func(d mod.Module) {
 			defer w8.Done()
-			adv, err := u.CheckModule(ctx, d, conf)
+			adv, err := CheckModule(ctx, d, conf)
 			if err != nil {
 				up.must(err)
 				return
@@ -69,11 +61,11 @@ func (u GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) *Upda
 	}
 	w8.Wait()
 
-	return up
+	return up.tips()
 }
 
-// CheckModule implements the Checker interface.
-func (u GoUp) CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error) {
+// CheckModule checks the version of the given module based on this configuration.
+func CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error) {
 	if ctx == nil || dep == nil {
 		return "", errors.ErrRepository
 	}

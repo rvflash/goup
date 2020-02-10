@@ -21,3 +21,7 @@ issues:
       text: "G304: Potential file inclusion via variable"
       linters:
         - gosec
+    - path: internal/app/app_test\.go
+      text: "SA1012: do not pass a nil Context"
+      linters:
+        - staticcheck
