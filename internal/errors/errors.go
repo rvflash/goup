@@ -12,7 +12,7 @@ import (
 
 // NewCharset returns a new charset's error.
 func NewCharset(charset string) error {
-	return errors.New("unsupported charset:" + charset)
+	return errors.New("unsupported charset: " + charset)
 }
 
 // NewMissingData returns the data is missing.

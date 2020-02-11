@@ -5,12 +5,29 @@
 package errors_test
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/matryer/is"
-	"github.com/rvflash/goup/internal/errors"
+	uperrs "github.com/rvflash/goup/internal/errors"
 )
 
+const charset = "utf8"
+
+func TestNewCharset(t *testing.T) {
+	is.New(t).Equal(uperrs.NewCharset(charset).Error(), "unsupported charset: "+charset)
+}
+
+func TestNewMissingData(t *testing.T) {
+	var (
+		err = uperrs.NewMissingData(charset)
+		are = is.New(t)
+	)
+	are.True(errors.Is(err, uperrs.ErrMissing))      // wrong error kind
+	are.True(strings.Contains(err.Error(), charset)) // missing source
+}
+
 func TestErrUp_Error(t *testing.T) {
-	is.New(t).Equal(errors.ErrRepository.Error(), "invalid repository")
+	is.New(t).Equal(uperrs.ErrRepository.Error(), "invalid repository")
 }
