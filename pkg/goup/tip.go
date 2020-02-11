@@ -6,8 +6,6 @@ package goup
 
 import (
 	"fmt"
-
-	"github.com/rvflash/goup/internal/mod"
 )
 
 // Tip exposes methods to retrieve an order (with Err method) or an advice.
@@ -32,32 +30,4 @@ func (t *tip) String() string {
 		return t.err.Error()
 	}
 	return t.msg
-}
-
-func newError(module mod.Module, err error) error {
-	if module == nil || err == nil {
-		return nil
-	}
-	return fmt.Errorf("%s check failed: %w", module.Path(), err)
-}
-
-func newOrder(module mod.Module, msg string) error {
-	if module == nil {
-		return nil
-	}
-	return fmt.Errorf("%s %s must be updated with %s", module.Path(), module.Version().String(), msg)
-}
-
-func checked(module mod.Module) string {
-	if module == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s %s not to update", module.Path(), module.Version().String())
-}
-
-func skipped(module mod.Module) string {
-	if module == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s %s update skipped", module.Path(), module.Version().String())
 }
