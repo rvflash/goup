@@ -28,7 +28,7 @@ func checked(module mod.Module) string {
 	if module == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s %s not to update", module.Path(), module.Version().String())
+	return fmt.Sprintf("%s %s is up to date", module.Path(), module.Version().String())
 }
 
 func skipped(module mod.Module) string {

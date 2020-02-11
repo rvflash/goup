@@ -26,10 +26,10 @@ It parses `go.mod` files to get dependencies with their version, uses [go-git](h
 
 ```shell script
 $ goup -v -m ./...
-$ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 not to update
+$ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 is up to date
 $ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated with v1.2.0
-$ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 not to update
-$ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 not to update
+$ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 is up to date
+$ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 is up to date
 ```
 
 

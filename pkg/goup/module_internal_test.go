@@ -83,7 +83,7 @@ func TestChecked(t *testing.T) {
 	)
 	are.Equal(checked(m), "") // mismatch default
 	m = newModule(ctrl)
-	are.Equal(checked(m), "github.com/rvflash/test v1.0.1+test not to update") // mismatch result
+	are.Equal(checked(m), "github.com/rvflash/test v1.0.1+test is up to date") // mismatch result
 }
 
 func TestSkipped(t *testing.T) {
