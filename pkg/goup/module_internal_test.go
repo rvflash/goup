@@ -11,9 +11,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
-	mock_mod "github.com/rvflash/goup/internal/mock/mod"
+
 	"github.com/rvflash/goup/internal/mod"
 	"github.com/rvflash/goup/internal/semver"
+	mock_mod "github.com/rvflash/goup/testdata/mock/mod"
 )
 
 func TestNewError(t *testing.T) {
