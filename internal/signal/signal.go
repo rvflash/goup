@@ -26,13 +26,9 @@ func listen(parent context.Context, sig ...os.Signal) context.Context {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, sig...)
 	go func() {
-		select {
-		case <-c:
-			signal.Stop(c)
-			cancel()
-		case <-ctx.Done():
-			return
-		}
+		<-c
+		signal.Stop(c)
+		cancel()
 	}()
 	return ctx
 }
