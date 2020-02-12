@@ -78,7 +78,7 @@ func Open(version string, opts ...Configurator) (*App, error) {
 	}
 	opts = append([]Configurator{
 		WithErrOutput(os.Stderr),
-		WithOutput(os.Stdin),
+		WithOutput(os.Stdout),
 		WithParser(mod.Parse),
 		WithChecker(goup.CheckFile),
 	}, opts...)

@@ -30,6 +30,8 @@ func (e errUp) Error() string {
 const (
 	// ErrExpectedTag is returned when the version is not a release tag.
 	ErrExpectedTag = errUp("release tag expected")
+	// ErrFetch is returned when the fetching of versions failed.
+	ErrFetch = errUp("failed to list tags")
 	// ErrMissing is returned when the data is missing.
 	ErrMissing = errUp("missing data")
 	// ErrMod is returned when the go.mod file is invalid.
@@ -38,6 +40,4 @@ const (
 	ErrSystem = errUp("invalid VCS")
 	// ErrRepository is returned when the repository is invalid.
 	ErrRepository = errUp("invalid repository")
-	// ErrFetch is returned when the fetching of versions failed.
-	ErrFetch = errUp("failed to list tags")
 )
