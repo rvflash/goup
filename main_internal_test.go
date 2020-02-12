@@ -7,7 +7,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -45,7 +44,6 @@ func TestRun(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			err := run(tt.ctx, tt.cnf, tt.args, tt.stdout, tt.stderr)
-			fmt.Println(err)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 		})
 	}
