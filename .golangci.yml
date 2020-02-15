@@ -13,6 +13,7 @@ issues:
         - gomnd
         - gochecknoglobals
         - funlen
+        - dupl
     - path: main\.go
       text: "`buildVersion` is a global variable"
       linters:
@@ -25,7 +26,7 @@ issues:
       text: "SA1012: do not pass a nil Context"
       linters:
         - staticcheck
-    - path: internal/vcs/vcs\.go
+    - path: internal/vcs/http\.go
       text: "G402: TLS InsecureSkipVerify set true."
       linters:
         - gosec

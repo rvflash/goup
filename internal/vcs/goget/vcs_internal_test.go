@@ -7,7 +7,6 @@ package goget
 import (
 	"errors"
 	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -79,16 +78,4 @@ func TestCharsetReader(t *testing.T) {
 			are.Equal(out, tt.out)         // mismatch result
 		})
 	}
-}
-
-func TestRepoPath(t *testing.T) {
-	var (
-		are = is.New(t)
-		uri *url.URL
-		err error
-	)
-	are.Equal(repoPath(uri), "") // Default
-	uri, err = url.Parse("https://google.golang.org/appengine?go-get=1")
-	are.NoErr(err)
-	are.Equal(repoPath(uri), "google.golang.org/appengine") // mismatch result
 }

@@ -72,12 +72,12 @@ func (s *VCS) fetchURL(ctx context.Context, system, url string) (semver.Tags, er
 	}
 }
 
-func (s *VCS) vcsByPath(ctx context.Context, path string) (vcs, remote string, err error) {
+func (s *VCS) vcsByPath(ctx context.Context, path string) (name, remote string, err error) {
 	if path == "" {
 		return "", "", errors.ErrRepository
 	}
 	for _, protocol := range []string{"https://", "http://"} {
-		vcs, remote, err = s.vcsByURL(ctx, protocol+path)
+		name, remote, err = s.vcsByURL(ctx, protocol+path)
 		if err == nil {
 			break
 		}
@@ -85,7 +85,7 @@ func (s *VCS) vcsByPath(ctx context.Context, path string) (vcs, remote string, e
 	return
 }
 
-func (s *VCS) vcsByURL(ctx context.Context, url string) (vcs, remote string, err error) {
+func (s *VCS) vcsByURL(ctx context.Context, url string) (name, remote string, err error) {
 	if ctx == nil || s.http == nil {
 		return "", "", errors.ErrSystem
 	}
@@ -100,7 +100,7 @@ func (s *VCS) vcsByURL(ctx context.Context, url string) (vcs, remote string, err
 	setQuery(req.URL)
 
 	var resp *http.Response
-	resp, err = s.http.ClientFor(repoPath(req.URL)).Do(req)
+	resp, err = s.http.ClientFor(vcs.RepoPath(req.URL)).Do(req)
 	if err != nil {
 		return
 	}
@@ -170,13 +170,6 @@ func charsetReader(charset string, input io.Reader) (io.Reader, error) {
 	default:
 		return nil, vcs.Errorf(Name, errors.NewCharset(charset))
 	}
-}
-
-func repoPath(u *url.URL) string {
-	if u == nil {
-		return ""
-	}
-	return u.Host + u.Path
 }
 
 const enabled = "1"

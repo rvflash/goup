@@ -7,10 +7,14 @@ package git
 
 import (
 	"context"
+	"net/http"
+	"net/url"
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/client"
+	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/storage"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 
@@ -24,17 +28,16 @@ const Name = "git"
 
 // VCS is a Git PrintVersion Control VCS.
 type VCS struct {
+	client  vcs.ClientChooser
 	storage storage.Storer
 }
 
-type reference struct {
-	list semver.Tags
-	err  error
-}
-
 // New returns a new instance of VCS.
-func New() *VCS {
-	return &VCS{storage: memory.NewStorage()}
+func New(client vcs.ClientChooser) *VCS {
+	return &VCS{
+		client:  client,
+		storage: memory.NewStorage(),
+	}
 }
 
 // CanFetch implements the vcs.VCS interface.
@@ -42,41 +45,89 @@ func (s *VCS) CanFetch(_ string) bool {
 	return true
 }
 
+const oneRef = 1
+
 // FetchPath implements the vcs.VCS interface.
 func (s *VCS) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
-	if ctx == nil || s.storage == nil {
+	if !s.ready(ctx) {
 		return nil, errors.ErrSystem
 	}
 	if path == "" {
 		return nil, errors.ErrRepository
 	}
-	var c = make(chan *reference, 1)
+	var c = make(chan *reference, oneRef)
 	go func() {
 		c <- s.fetchWithRetry(path)
 	}()
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case ref := <-c:
-		if err := ref.err; err != nil {
-			return nil, err
-		}
-		return ref.list, nil
-	}
+	return tags(ctx, c)
 }
 
 // FetchURL implements the vcs.VCS interface.
 func (s *VCS) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
-	if ctx == nil || s.storage == nil {
+	if !s.ready(ctx) {
 		return nil, errors.ErrSystem
 	}
-	if url == "" {
-		return nil, errors.ErrRepository
-	}
-	var c = make(chan *reference, 1)
+	var c = make(chan *reference, oneRef)
 	go func() {
 		c <- s.fetch(url)
 	}()
+	return tags(ctx, c)
+}
+
+func (s *VCS) fetchWithRetry(path string) (ref *reference) {
+	for _, t := range []transport{
+		{protocol: "https://"},
+		{protocol: "http://"},
+	} {
+		ref = s.fetch(t.rawURL(path))
+		if ref.err == nil {
+			break
+		}
+	}
+	return
+}
+
+func (s *VCS) fetch(rawURL string) (ref *reference) {
+	ref = new(reference)
+	u, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		ref.err = vcs.Errorf(Name, errors.ErrRepository, err)
+		return
+	}
+	// Override http(s) default protocol to use one dedicated to this package.
+	client.InstallProtocol("https", githttp.NewClient(s.client.ClientFor(vcs.RepoPath(u)).(*http.Client)))
+	rem := git.NewRemote(s.storage, &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{u.String()},
+	})
+	// Retrieves the releases list of the repository.
+	var res []*plumbing.Reference
+	res, err = rem.List(&git.ListOptions{})
+	if err != nil {
+		ref.err = vcs.Errorf(Name, errors.ErrFetch, err)
+		return
+	}
+	// Filters to keep only tag.
+	var n plumbing.ReferenceName
+	for _, r := range res {
+		n = r.Name()
+		if n.IsTag() {
+			ref.list = append(ref.list, semver.New(n.Short()))
+		}
+	}
+	return
+}
+
+func (s *VCS) ready(ctx context.Context) bool {
+	return ctx != nil && s.storage != nil && s.client != nil
+}
+
+type reference struct {
+	list semver.Tags
+	err  error
+}
+
+func tags(ctx context.Context, c chan *reference) (semver.Tags, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -93,43 +144,6 @@ type transport struct {
 	extension string
 }
 
-// URL builds and returns a URL based on transport data and the given path.
-func (t transport) URL(path string) string {
+func (t transport) rawURL(path string) string {
 	return t.protocol + path + t.extension
-}
-
-func (s *VCS) fetchWithRetry(path string) (ref *reference) {
-	for _, t := range []transport{
-		// {protocol: "git://", extension: ".git"},
-		// {protocol: "ssh://git@"},
-		{protocol: "https://"},
-		{protocol: "http://"},
-	} {
-		ref = s.fetch(t.URL(path))
-		if ref.err == nil {
-			break
-		}
-	}
-	return
-}
-
-func (s *VCS) fetch(url string) (ref *reference) {
-	ref = new(reference)
-	rem := git.NewRemote(s.storage, &config.RemoteConfig{
-		Name: "origin",
-		URLs: []string{url},
-	})
-	res, err := rem.List(&git.ListOptions{})
-	if err != nil {
-		ref.err = vcs.Errorf(Name, errors.ErrFetch, err)
-		return
-	}
-	var n plumbing.ReferenceName
-	for _, r := range res {
-		n = r.Name()
-		if n.IsTag() {
-			ref.list = append(ref.list, semver.New(n.Short()))
-		}
-	}
-	return
 }

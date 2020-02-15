@@ -74,8 +74,8 @@ func CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, erro
 		return skipped(dep), nil
 	}
 	var (
-		gitVCS     = git.New()
 		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
+		gitVCS     = git.New(httpClient)
 	)
 	for _, remote := range []vcs.System{
 		goget.New(httpClient, gitVCS),
