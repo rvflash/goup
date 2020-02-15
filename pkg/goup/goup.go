@@ -120,12 +120,8 @@ func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool
 const sep = ","
 
 func onlyTag(d mod.Module, paths string) error {
-	if d == nil {
-		return nil
-	}
 	for _, path := range strings.Split(paths, sep) {
-		path = strings.TrimSpace(path)
-		if path == "" {
+		if path = strings.TrimSpace(path); path == "" {
 			continue
 		}
 		if strings.Contains(d.Path(), path) && !d.Version().IsTag() {
