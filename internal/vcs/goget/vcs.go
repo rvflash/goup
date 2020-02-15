@@ -10,6 +10,7 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/rvflash/goup/internal/errors"
@@ -24,15 +25,15 @@ const Name = "go-get"
 // VCS is a go-get version control system.
 // We use go-get to retrieve the remote's properties behind a package.
 type VCS struct {
-	client vcs.HTTPClient
-	git    vcs.System
+	http vcs.ClientChooser
+	git  vcs.System
 }
 
 // New creates a new instance of VCS.
-func New(client vcs.HTTPClient, git vcs.System) *VCS {
+func New(client vcs.ClientChooser, git vcs.System) *VCS {
 	return &VCS{
-		client: client,
-		git:    git,
+		http: client,
+		git:  git,
 	}
 }
 
@@ -67,29 +68,8 @@ func (s *VCS) fetchURL(ctx context.Context, system, url string) (semver.Tags, er
 	case git.Name:
 		return s.git.FetchURL(ctx, url)
 	default:
-		return nil, errors.ErrSystem
+		return nil, vcs.Errorf(system, errors.ErrSystem)
 	}
-}
-
-func (s *VCS) vcsByURL(ctx context.Context, url string) (vcs, remote string, err error) {
-	if ctx == nil || s.client == nil {
-		return "", "", errors.ErrSystem
-	}
-	if url == "" {
-		return "", "", errors.ErrRepository
-	}
-	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return
-	}
-	var resp *http.Response
-	resp, err = s.client.Do(req)
-	if err != nil {
-		return
-	}
-	defer func() { _ = resp.Body.Close() }()
-	return parseMetaGoImport(resp.Body)
 }
 
 func (s *VCS) vcsByPath(ctx context.Context, path string) (vcs, remote string, err error) {
@@ -103,6 +83,30 @@ func (s *VCS) vcsByPath(ctx context.Context, path string) (vcs, remote string, e
 		}
 	}
 	return
+}
+
+func (s *VCS) vcsByURL(ctx context.Context, url string) (vcs, remote string, err error) {
+	if ctx == nil || s.http == nil {
+		return "", "", errors.ErrSystem
+	}
+	if url == "" {
+		return "", "", errors.ErrRepository
+	}
+	var req *http.Request
+	req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return
+	}
+	setQuery(req.URL)
+
+	var resp *http.Response
+	resp, err = s.http.ClientFor(repoPath(req.URL)).Do(req)
+	if err != nil {
+		return
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	return parseMetaGoImport(resp.Body)
 }
 
 const (
@@ -150,6 +154,15 @@ func parseMetaGoImport(r io.Reader) (vcs, url string, err error) {
 	return
 }
 
+func attrValue(attrs []xml.Attr, name string) string {
+	for _, a := range attrs {
+		if strings.EqualFold(a.Name.Local, name) {
+			return a.Value
+		}
+	}
+	return ""
+}
+
 func charsetReader(charset string, input io.Reader) (io.Reader, error) {
 	switch strings.ToLower(charset) {
 	case utf8, ascii:
@@ -159,11 +172,20 @@ func charsetReader(charset string, input io.Reader) (io.Reader, error) {
 	}
 }
 
-func attrValue(attrs []xml.Attr, name string) string {
-	for _, a := range attrs {
-		if strings.EqualFold(a.Name.Local, name) {
-			return a.Value
-		}
+func repoPath(u *url.URL) string {
+	if u == nil {
+		return ""
 	}
-	return ""
+	return u.Host + u.Path
+}
+
+const enabled = "1"
+
+func setQuery(u *url.URL) {
+	if u == nil {
+		return
+	}
+	values, _ := url.ParseQuery(u.RawQuery)
+	values.Set(Name, enabled)
+	u.RawQuery = values.Encode()
 }

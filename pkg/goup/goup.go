@@ -23,15 +23,16 @@ type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
 
 // Config is used as the settings of the GoUp application.
 type Config struct {
-	ExcludeIndirect bool
-	ForceUpdate     bool
-	Major           bool
-	MajorMinor      bool
-	PrintVersion    bool
-	Strict          bool
-	Verbose         bool
-	OnlyReleases    string
-	Timeout         time.Duration
+	ExcludeIndirect  bool
+	ForceUpdate      bool
+	Major            bool
+	MajorMinor       bool
+	PrintVersion     bool
+	Strict           bool
+	Verbose          bool
+	InsecurePatterns string
+	OnlyReleases     string
+	Timeout          time.Duration
 }
 
 const delta = 1
@@ -74,7 +75,7 @@ func CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, erro
 	}
 	var (
 		gitVCS     = git.New()
-		httpClient = vcs.NewHTTPClient(conf.Timeout)
+		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
 	)
 	for _, remote := range []vcs.System{
 		goget.New(httpClient, gitVCS),

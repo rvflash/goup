@@ -5,6 +5,7 @@
 package app
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/matryer/is"
@@ -12,9 +13,7 @@ import (
 
 const (
 	root    = "/rv"
-	modFile = "/rv/go.mod"
-	badPath = "../../testdata/not_found"
-	treeDir = "../../testdata/gomod/tree"
+	modFile = root + "/go.mod"
 	numFile = 2
 )
 
@@ -26,13 +25,15 @@ func TestFilePath(t *testing.T) {
 
 func TestWalkPath(t *testing.T) {
 	var (
-		are = is.New(t)
-		res []string
+		are  = is.New(t)
+		res  []string
+		bad  = []string{"..", "..", "testdata", "not_exists"}
+		tree = []string{"..", "..", "testdata", "golden", "tree"}
 	)
 	res = walkPath(".")
 	are.True(len(res) == 0) // unexpected result
-	res = walkPath(badPath)
-	are.True(len(res) == 1)                    // mismatch not found
-	are.Equal(res[0], badPath)                 // mismatch not found result
-	are.Equal(len(walkPath(treeDir)), numFile) // mismatch result
+	res = walkPath(filepath.Join(bad...))
+	are.True(len(res) == 1)                                   // mismatch not found
+	are.Equal(res[0], filepath.Join(bad...))                  // mismatch not found result
+	are.Equal(len(walkPath(filepath.Join(tree...))), numFile) // mismatch result
 }

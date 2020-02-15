@@ -105,14 +105,14 @@ func (v Version) Canonical() string {
 	return v.canonical
 }
 
-// IsValid implements the Tag interface.
-func (v Version) IsValid() bool {
-	return v.canonical != ""
-}
-
 // IsTag implements the Tag interface.
 func (v Version) IsTag() bool {
 	return v.canonical != "" && v.build == "" && v.prerelease == ""
+}
+
+// IsValid implements the Tag interface.
+func (v Version) IsValid() bool {
+	return v.canonical != ""
 }
 
 // Major implements the Tag interface.

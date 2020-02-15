@@ -25,3 +25,7 @@ issues:
       text: "SA1012: do not pass a nil Context"
       linters:
         - staticcheck
+    - path: internal/vcs/vcs\.go
+      text: "G402: TLS InsecureSkipVerify set true."
+      linters:
+        - gosec

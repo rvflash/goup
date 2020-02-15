@@ -6,6 +6,7 @@ package mod_test
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -27,11 +28,11 @@ func TestOpen(t *testing.T) {
 			"default":        {err: uperr.ErrMod},
 			"invalid name":   {in: []string{"testdata"}, err: uperr.ErrMod},
 			"invalid path":   {in: []string{"testdata", mod.Filename}, err: uperr.ErrMod},
-			"invalid go.mod": {in: []string{"..", "..", "testdata", "gomod", "invalid", mod.Filename}, err: uperr.ErrMod},
+			"invalid go.mod": {in: []string{"..", "..", "testdata", "golden", "invalid", mod.Filename}, err: uperr.ErrMod},
 			"valid go.mod": {
-				in:     []string{"..", "..", "testdata", "gomod", "valid", mod.Filename},
+				in:     []string{"..", "..", "testdata", "golden", "valid", mod.Filename},
 				module: "github.com/rvflash/goup",
-				depLen: 4,
+				depLen: 15,
 			},
 		}
 	)
@@ -39,6 +40,7 @@ func TestOpen(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			out, err := mod.Parse(filepath.Join(tt.in...))
+			fmt.Println(err)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 			if tt.err == nil {
 				are.Equal(out.Module(), tt.module)            // mismatch module

@@ -22,13 +22,16 @@ import (
 var buildVersion string
 
 const (
-	errorCode = 1
-	timeout   = 10 * time.Second
+	errorCode  = 1
+	goInsecure = "GOINSECURE"
+	timeout    = 10 * time.Second
 )
 
 func main() {
 	var (
-		c goup.Config
+		c = goup.Config{
+			InsecurePatterns: os.Getenv(goInsecure),
+		}
 		s = "exclude indirect modules"
 	)
 	flag.BoolVar(&c.ExcludeIndirect, "i", false, s)

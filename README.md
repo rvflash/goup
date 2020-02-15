@@ -20,6 +20,8 @@ It parses `go.mod` files to get dependencies with their version, uses [go-git](h
 1. Takes care of each part of a mod file: `require`, `exclude` and `replace`.
 1. Allows the capacity to force some modules to only use release tag, no prerelease.
 1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
+1. As with go1.14, you can use the GOINSECURE environment variable to skip certificate validation and do
+not require an HTTPS connection.
 
 
 ## Demo
