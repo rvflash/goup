@@ -7,7 +7,8 @@
 
 
 `goup` checks if there are any updates for imports in your module.
-It parses `go.mod` files to get dependencies with their version, uses [go-git](https://github.com/src-d/go-git) to retrieve the list of remote tags and performs comparisons to advise to update if necessary.
+It parses `go.mod` files to get dependencies with their version, uses [go-git](https://github.com/src-d/go-git) 
+to retrieve the list of remote tags and performs comparisons to advise to update if necessary.
 
 > For now, it doesn't update the go mod file. An option to force it is planned but for the moment,
 > the main purpose is using it as a linter in continuous integration or in development process.
@@ -16,11 +17,12 @@ It parses `go.mod` files to get dependencies with their version, uses [go-git](h
 ## Features
 
 1. No dependency. Pure Go tool designed to be used as a linter. Zero call to `go` or `git` command line tools.
-1. As `go.mod` uses the semantic versioning for module version, `goup` does the same and provides 3 modes: major, major+minor and by default, path. 
+1. As `go.mod` uses the semantic versioning for module version, `goup` does the same and provides 3 modes: major, 
+major+minor and by default, path. 
 1. Takes care of each part of a mod file: `require`, `exclude` and `replace`.
 1. Allows the capacity to force some modules to only use release tag, no prerelease.
 1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
-1. As with go1.14, you can use the GOINSECURE environment variable to skip certificate validation and do
+1. As with go1.14, you can use the `GOINSECURE` environment variable to skip certificate validation and do
 not require an HTTPS connection.
 
 
@@ -33,7 +35,6 @@ $ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated wi
 $ goup: github.com/rvflash/goup: github.com/golang/mock v1.4.0 is up to date
 $ goup: github.com/rvflash/goup: gopkg.in/src-d/go-git.v4 v4.13.1 is up to date
 ```
-
 
 ## Installation
 
@@ -66,8 +67,9 @@ It supports the following flags:
 * `-m`: ensures to have the latest couple major with minor version. By default: only the path is challenged.
 * `-V`: prints the version of the tool.
 * `-i`: allows to exclude indirect modules.
-* `-r`: it's a comma separated list of repositories (or part of) used to force tag usage.
-For example with `gitlab` as value, any modules with this word in the path must have a release tag, no prerelease.  
+* `-r`: it's a comma-separated list of glob patterns to match the repository paths where to force tag usage.
+For example with `github.com/group/*` as value, any modules in this repository group must have a release tag,
+no prerelease. 
 * `-s`: forces the process to exit on first error occurred.
 * `-t`: defines the maximum time duration to perform the check. By default: 10s. 
 * `-v`: verbose output

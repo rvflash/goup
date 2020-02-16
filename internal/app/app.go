@@ -80,7 +80,7 @@ func Open(version string, opts ...Configurator) (*App, error) {
 		WithErrOutput(os.Stderr),
 		WithOutput(os.Stdout),
 		WithParser(mod.Parse),
-		WithChecker(goup.CheckFile),
+		WithChecker(goup.Check),
 	}, opts...)
 	for _, opt := range opts {
 		err := opt(a)

@@ -41,7 +41,7 @@ func main() {
 	flag.BoolVar(&c.Major, "M", false, s)
 	s = "ensure to have the latest couple major with minor version"
 	flag.BoolVar(&c.MajorMinor, "m", false, s)
-	s = "comma separated list of repositories (or part of), where forcing tag usage"
+	s = "comma-separated list of glob patterns to match the repository paths where to force tag usage."
 	flag.StringVar(&c.OnlyReleases, "r", "", s)
 	s = "maximum time duration"
 	flag.DurationVar(&c.Timeout, "t", timeout, s)

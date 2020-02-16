@@ -6,6 +6,7 @@ package goup
 
 import (
 	"context"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -17,9 +18,6 @@ import (
 	"github.com/rvflash/goup/internal/vcs/git"
 	"github.com/rvflash/goup/internal/vcs/goget"
 )
-
-// Checker must be implemented to check updates on go mod file or module.
-type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
 
 // Config is used as the settings of the GoUp application.
 type Config struct {
@@ -35,24 +33,71 @@ type Config struct {
 	Timeout          time.Duration
 }
 
+// Check is the default checker of go.mod file.
+func Check(ctx context.Context, file mod.Mod, conf Config) []Tip {
+	return New(conf).CheckFile(ctx, file, conf)
+}
+
+// Checker must be implemented to check updates on go mod file or module.
+type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
+
+// Setter defines the interface used to set settings.
+type Setter func(u *GoUp)
+
+// SetGit set the VCS git.
+func SetGit(git vcs.System) Setter {
+	return func(u *GoUp) {
+		u.git = git
+	}
+}
+
+// SetGoGet sets the VCS go-get.
+func SetGoGet(goGet vcs.System) Setter {
+	return func(u *GoUp) {
+		u.goGet = goGet
+	}
+}
+
+// New returns a new instance of GoUp with the default dependencies checkers.
+func New(conf Config, sets ...Setter) *GoUp {
+	var (
+		u          = new(GoUp)
+		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
+		gitVCS     = git.New(httpClient)
+	)
+	sets = append([]Setter{
+		SetGit(gitVCS),
+		SetGoGet(goget.New(httpClient, gitVCS)),
+	}, sets...)
+	for _, set := range sets {
+		set(u)
+	}
+	return u
+}
+
+// GoUp allows to check a go.mod file with each of these dependencies.
+type GoUp struct {
+	git, goGet vcs.System
+}
+
 const delta = 1
 
 // CheckFile verifies the given go.mod file based on this configuration.
-func CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
+// It's implements the Checker interface.
+func (u *GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
 	up := &updates{Mod: file}
-	if parent == nil || file == nil {
+	if !u.ready(parent) || file == nil {
 		up.must(errors.ErrMod)
-		return nil
+		return up.tips()
 	}
 	ctx, cancel := context.WithTimeout(parent, conf.Timeout)
 	defer cancel()
-
 	var w8 sync.WaitGroup
 	for _, d := range file.Dependencies() {
 		w8.Add(delta)
 		go func(d mod.Module) {
 			defer w8.Done()
-			adv, err := CheckModule(ctx, d, conf)
+			adv, err := u.CheckModule(ctx, d, conf)
 			if err != nil {
 				up.must(err)
 				return
@@ -66,25 +111,18 @@ func CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
 }
 
 // CheckModule checks the version of the given module based on this configuration.
-func CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error) {
-	if ctx == nil || dep == nil {
+func (u *GoUp) CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error) {
+	if !u.ready(ctx) || dep == nil {
 		return "", errors.ErrRepository
 	}
 	if conf.ExcludeIndirect && dep.Indirect() {
 		return skipped(dep), nil
 	}
-	var (
-		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
-		gitVCS     = git.New(httpClient)
-	)
-	for _, remote := range []vcs.System{
-		goget.New(httpClient, gitVCS),
-		gitVCS,
-	} {
-		if !remote.CanFetch(dep.Path()) {
+	for _, system := range []vcs.System{u.goGet, u.git} {
+		if !system.CanFetch(dep.Path()) {
 			continue
 		}
-		vs, err := remote.FetchPath(ctx, dep.Path())
+		vs, err := system.FetchPath(ctx, dep.Path())
 		if err != nil {
 			return "", newError(dep, err)
 		}
@@ -104,6 +142,10 @@ func CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, erro
 	return "", newError(dep, errors.ErrSystem)
 }
 
+func (u *GoUp) ready(ctx context.Context) bool {
+	return ctx != nil && u.goGet != nil && u.git != nil
+}
+
 func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool) {
 	var v semver.Tag
 	switch {
@@ -119,12 +161,14 @@ func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool
 
 const sep = ","
 
-func onlyTag(d mod.Module, paths string) error {
-	for _, path := range strings.Split(paths, sep) {
-		if path = strings.TrimSpace(path); path == "" {
+func onlyTag(d mod.Module, globs string) error {
+	var matched bool
+	for _, glob := range strings.Split(globs, sep) {
+		if glob = strings.TrimSpace(glob); glob == "" {
 			continue
 		}
-		if strings.Contains(d.Path(), path) && !d.Version().IsTag() {
+		matched, _ = path.Match(glob, d.Path())
+		if matched && !d.Version().IsTag() {
 			return errors.ErrExpectedTag
 		}
 	}

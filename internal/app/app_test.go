@@ -129,7 +129,7 @@ func TestWithChecker(t *testing.T) {
 		are.True(a == nil)                         // mismatch result
 	})
 	t.Run("ok", func(t *testing.T) {
-		a, err := app.Open(version, app.WithChecker(goup.CheckFile))
+		a, err := app.Open(version, app.WithChecker(goup.Check))
 		are.Equal(err, nil) // mismatch error
 		are.True(a != nil)  // mismatch result
 	})

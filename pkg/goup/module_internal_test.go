@@ -99,15 +99,15 @@ func TestSkipped(t *testing.T) {
 }
 
 const (
-	release = "v1.0.2"
-	path    = "github.com/rvflash/test"
-	version = "v1.0.1+test"
+	release  = "v1.0.2"
+	repoName = "github.com/rvflash/test"
+	version  = "v1.0.1+test"
 )
 
 func newModule(ctrl *gomock.Controller) mod.Module {
 	m := mock_mod.NewMockModule(ctrl)
 	m.EXPECT().Indirect().Return(false).AnyTimes()
-	m.EXPECT().Path().Return(path).AnyTimes()
+	m.EXPECT().Path().Return(repoName).AnyTimes()
 	m.EXPECT().Version().Return(semver.New(version)).AnyTimes()
 	return m
 }
