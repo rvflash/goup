@@ -7,14 +7,11 @@ package git
 
 import (
 	"context"
-	"net/http"
 	"net/url"
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/client"
-	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/storage"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 
@@ -94,8 +91,8 @@ func (s *VCS) fetch(rawURL string) (ref *reference) {
 		ref.err = vcs.Errorf(Name, errors.ErrRepository, err)
 		return
 	}
-	// Override http(s) default protocol to use one dedicated to this package.
-	client.InstallProtocol("https", githttp.NewClient(s.client.ClientFor(vcs.RepoPath(u)).(*http.Client)))
+	// Override http(s) default protocol to use one dedicated to this package (insecure?).
+	// For now, it is not possible with git, the HTTP client is embedded and global set :/
 	rem := git.NewRemote(s.storage, &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{u.String()},
