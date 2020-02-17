@@ -13,8 +13,11 @@ import (
 	"github.com/matryer/is"
 
 	"github.com/rvflash/goup/internal/mod"
-	"github.com/rvflash/goup/internal/semver"
-	mock_mod "github.com/rvflash/goup/testdata/mock/mod"
+)
+
+const (
+	release  = "v1.0.2"
+	repoName = "example.com/group/go"
 )
 
 func TestNewError(t *testing.T) {
@@ -28,9 +31,9 @@ func TestNewError(t *testing.T) {
 			in, out error
 		}{
 			"default":       {},
-			"missing error": {mod: newModule(ctrl)},
+			"missing error": {mod: newMockModule(ctrl, false)},
 			"missing mod":   {in: err},
-			"ok":            {mod: newModule(ctrl), in: err, out: err},
+			"ok":            {mod: newMockModule(ctrl, false), in: err, out: err},
 		}
 	)
 	for name, tt := range dt {
@@ -56,8 +59,8 @@ func TestNewOrder(t *testing.T) {
 			fail bool
 		}{
 			"default":         {},
-			"missing message": {mod: newModule(ctrl), fail: true},
-			"ok":              {mod: newModule(ctrl), in: release, fail: true},
+			"missing message": {mod: newMockModule(ctrl, false), fail: true},
+			"ok":              {mod: newMockModule(ctrl, false), in: release, fail: true},
 		}
 	)
 	for name, tt := range dt {
@@ -82,8 +85,8 @@ func TestChecked(t *testing.T) {
 		are = is.New(t)
 	)
 	are.Equal(checked(m), "") // mismatch default
-	m = newModule(ctrl)
-	are.Equal(checked(m), "github.com/rvflash/test v1.0.1+test is up to date") // mismatch result
+	m = newMockModule(ctrl, false)
+	are.Equal(checked(m), "example.com/group/go v1.0.2 is up to date") // mismatch result
 }
 
 func TestSkipped(t *testing.T) {
@@ -94,20 +97,6 @@ func TestSkipped(t *testing.T) {
 		are = is.New(t)
 	)
 	are.Equal(skipped(m), "") // mismatch default
-	m = newModule(ctrl)
-	are.Equal(skipped(m), "github.com/rvflash/test v1.0.1+test update skipped") // mismatch result
-}
-
-const (
-	release  = "v1.0.2"
-	repoName = "github.com/rvflash/test"
-	version  = "v1.0.1+test"
-)
-
-func newModule(ctrl *gomock.Controller) mod.Module {
-	m := mock_mod.NewMockModule(ctrl)
-	m.EXPECT().Indirect().Return(false).AnyTimes()
-	m.EXPECT().Path().Return(repoName).AnyTimes()
-	m.EXPECT().Version().Return(semver.New(version)).AnyTimes()
-	return m
+	m = newMockModule(ctrl, false)
+	are.Equal(skipped(m), "example.com/group/go v1.0.2 update skipped") // mismatch result
 }

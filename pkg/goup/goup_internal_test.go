@@ -6,14 +6,16 @@ package goup
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
-	"github.com/rvflash/goup/internal/errors"
+	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/mod"
 	"github.com/rvflash/goup/internal/semver"
+	"github.com/rvflash/goup/internal/vcs"
 	mock_mod "github.com/rvflash/goup/testdata/mock/mod"
 	mock_vcs "github.com/rvflash/goup/testdata/mock/vcs"
 )
@@ -31,37 +33,103 @@ func TestGoUp_CheckFile(t *testing.T) {
 	defer ctrl.Finish()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	const v = "v1.0.0"
 	var (
-		sy1 = newMockSystem(ctrl, semver.Tags{semver.New(v)}, nil)
+		sy1 = newMockSystem(ctrl, semver.Tags{semver.New(release)}, nil)
 		are = is.New(t)
 		dt  = map[string]struct {
-			ctx  context.Context
-			file mod.Mod
-			cnf  Config
-			res  []Tip
+			system vcs.System
+			ctx    context.Context
+			file   mod.Mod
+			cnf    Config
+			res    []Tip
 		}{
-			"default":       {res: newErrTip(errors.ErrMod)},
-			"no context":    {file: mock_mod.NewMockMod(ctrl), res: newErrTip(errors.ErrMod)},
-			"no file":       {ctx: ctx, res: newErrTip(errors.ErrMod)},
-			"no dependency": {ctx: ctx, file: newMockMod(ctrl, nil)},
-			"all good": {
-				ctx: ctx,
+			"default":       {system: sy1, res: newErrTip(errup.ErrMod)},
+			"no context":    {system: sy1, file: mock_mod.NewMockMod(ctrl), res: newErrTip(errup.ErrMod)},
+			"no file":       {system: sy1, ctx: ctx, res: newErrTip(errup.ErrMod)},
+			"no dependency": {system: sy1, ctx: ctx, file: newMockMod(ctrl, nil)},
+			"up to date": {
+				system: sy1,
+				ctx:    ctx,
 				file: newMockMod(ctrl, []mod.Module{
-					newMockModule(ctrl, "gitlab.lan/group/pkg", "v1.0.0", false),
+					newMockModule(ctrl, false),
 				}),
-				res: newTip("gitlab.lan/group/pkg v1.0.0 is up to date"),
+				res: newTip("example.com/group/go v1.0.2 is up to date"),
+			},
+			"outdated": {
+				system: newMockSystem(ctrl, semver.Tags{semver.New("v1.0.3")}, nil),
+				ctx:    ctx,
+				file: newMockMod(ctrl, []mod.Module{
+					newMockModule(ctrl, false),
+				}),
+				res: newErrTip(errors.New("example.com/group/go v1.0.2 must be updated with v1.0.3")),
 			},
 		}
-		u = New(Config{}, SetGoGet(sy1))
 	)
 	for name, tt := range dt {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
-			res := u.CheckFile(tt.ctx, tt.file, tt.cnf)
+			res := New(Config{}, SetGoGet(tt.system), SetGit(tt.system)).CheckFile(tt.ctx, tt.file, tt.cnf)
 			are.Equal(res, tt.res) // mismatch result
 		})
 	}
+}
+
+func TestGoUp_CheckModule(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	var (
+		sy1 = newMockSystem(ctrl, semver.Tags{semver.New(release)}, nil)
+		are = is.New(t)
+		dt  = map[string]struct {
+			system vcs.System
+			ctx    context.Context
+			module mod.Module
+			cnf    Config
+			out    string
+			err    error
+		}{
+			"default":    {system: sy1, err: errup.ErrRepository},
+			"no context": {system: sy1, module: mock_mod.NewMockModule(ctrl), err: errup.ErrRepository},
+			"no module":  {system: sy1, ctx: ctx, err: errup.ErrRepository},
+			"skip indirect": {
+				system: sy1,
+				ctx:    ctx,
+				module: newMockModule(ctrl, true),
+				cnf:    Config{ExcludeIndirect: true},
+				out:    "example.com/group/go v1.0.2 update skipped",
+			},
+			"not matches vcs": {
+				system: newMockNoSystem(ctrl),
+				ctx:    ctx,
+				module: newMockModule(ctrl, true),
+				err:    errup.ErrSystem,
+			},
+			"ok": {
+				system: sy1,
+				ctx:    ctx,
+				module: newMockModule(ctrl, false),
+				cnf:    Config{ExcludeIndirect: true},
+				out:    "example.com/group/go v1.0.2 is up to date",
+			},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			u := New(Config{}, SetGoGet(tt.system), SetGit(tt.system))
+			out, err := u.CheckModule(tt.ctx, tt.module, tt.cnf)
+			are.True(errors.Is(err, tt.err)) // mismatch error
+			are.Equal(out, tt.out)           // mismatch result
+		})
+	}
+}
+
+func newMockNoSystem(ctrl *gomock.Controller) *mock_vcs.MockSystem {
+	m := mock_vcs.NewMockSystem(ctrl)
+	m.EXPECT().CanFetch(gomock.Any()).Return(false).AnyTimes()
+	return m
 }
 
 func newMockSystem(ctrl *gomock.Controller, tags semver.Tags, err error) *mock_vcs.MockSystem {
@@ -71,10 +139,10 @@ func newMockSystem(ctrl *gomock.Controller, tags semver.Tags, err error) *mock_v
 	return m
 }
 
-func newMockModule(ctrl *gomock.Controller, path, version string, indirect bool) *mock_mod.MockModule {
+func newMockModule(ctrl *gomock.Controller, indirect bool) *mock_mod.MockModule {
 	m := mock_mod.NewMockModule(ctrl)
-	m.EXPECT().Path().Return(path).AnyTimes()
-	m.EXPECT().Version().Return(semver.New(version)).AnyTimes()
+	m.EXPECT().Path().Return(repoName).AnyTimes()
+	m.EXPECT().Version().Return(semver.New(release)).AnyTimes()
 	m.EXPECT().Indirect().Return(indirect).AnyTimes()
 	return m
 }
@@ -148,7 +216,7 @@ func TestOnlyTag(t *testing.T) {
 			"valid glob pattern": {
 				dep:   newTag(ctrl, "v1.0.0-b42", 1),
 				paths: "example.com/*/*",
-				err:   errors.ErrExpectedTag,
+				err:   errup.ErrExpectedTag,
 			},
 			"skip": {dep: newTag(ctrl, "v1.0.0", 2), paths: "test,,example.com"},
 			"ok":   {dep: newTag(ctrl, "v1.0.0", 1), paths: "example.com/pkg/*"},
@@ -187,7 +255,7 @@ func newTip(msg string) []Tip {
 
 func newTag(ctrl *gomock.Controller, v string, times int) *mock_mod.MockModule {
 	d := mock_mod.NewMockModule(ctrl)
-	d.EXPECT().Path().Return("example.com/pkg/go").Times(times)
+	d.EXPECT().Path().Return(repoName).Times(times)
 	d.EXPECT().Version().Return(semver.New(v)).AnyTimes()
 	return d
 }
