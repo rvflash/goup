@@ -14,7 +14,7 @@ import (
 
 const (
 	ext  = ".git"
-	repo = "github.com/rvflash/goup"
+	repo = "example.com/group/pkg"
 )
 
 func TestTags(t *testing.T) {
@@ -48,10 +48,10 @@ func TestTransport_RawURL(t *testing.T) {
 			out string
 		}{
 			"default": {out: repo},
-			"ssh":     {in: transport{protocol: "ssh://git@"}, out: "ssh://git@github.com/rvflash/goup"},
-			"https":   {in: transport{protocol: "https://"}, out: "https://github.com/rvflash/goup"},
-			"http":    {in: transport{protocol: "http://", extension: ext}, out: "http://github.com/rvflash/goup.git"},
-			//?"git":     {in: transport{protocol: "git://", extension: ext}, out: "git@github.com:rvflash/goup.git"},
+			"ssh":     {in: transport{protocol: "ssh://git@"}, out: "ssh://git@example.com/group/pkg"},
+			"https":   {in: transport{protocol: "https://"}, out: "https://example.com/group/pkg"},
+			"http":    {in: transport{protocol: "http://", extension: ext}, out: "http://example.com/group/pkg.git"},
+			"git":     {in: transport{protocol: "git://", extension: ext}, out: "git://example.com:group/pkg.git"},
 		}
 	)
 	for name, tt := range dt {

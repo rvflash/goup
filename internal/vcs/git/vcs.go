@@ -8,6 +8,8 @@ package git
 import (
 	"context"
 	"net/url"
+	"path"
+	"strings"
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
@@ -73,7 +75,10 @@ func (s *VCS) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
 
 func (s *VCS) fetchWithRetry(path string) (ref *reference) {
 	for _, t := range []transport{
+		// Secure
 		{protocol: "https://"},
+		{protocol: "ssh://git@"},
+		// Insecure
 		{protocol: "http://"},
 	} {
 		ref = s.fetch(t.rawURL(path))
@@ -136,11 +141,28 @@ func tags(ctx context.Context, c chan *reference) (semver.Tags, error) {
 	}
 }
 
+const (
+	gitScheme = "git://"
+	// example.com/group/pkg, so with 2 slashes: 3 parts
+	stdNumPart = 3
+	slash      = "/"
+	twoDot     = ":"
+)
+
 type transport struct {
 	protocol  string
 	extension string
 }
 
-func (t transport) rawURL(path string) string {
-	return t.protocol + path + t.extension
+func (t transport) rawURL(uri string) string {
+	p := strings.Split(uri, slash)
+	if len(p) > stdNumPart {
+		uri = path.Join(p[:stdNumPart]...)
+	}
+	if t.protocol == gitScheme {
+		if len(p) > 1 {
+			uri = p[0] + twoDot + path.Join(p[1:]...)
+		}
+	}
+	return t.protocol + uri + t.extension
 }
