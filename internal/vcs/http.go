@@ -19,24 +19,24 @@ const (
 )
 
 // NewHTTPClient creates a new instance of Client.
-func NewHTTPClient(timeout time.Duration, goInsecure string) *HTTP {
+func NewHTTPClient(timeout time.Duration, goInsecure string) *HTTPClient {
 	skipSec := strings.Split(goInsecure, comma)
-	return &HTTP{
+	return &HTTPClient{
 		insecure: newInsecureHTTPClient(timeout),
 		secure:   newSecureHTTPClient(timeout),
 		skipSec:  skipSec,
 	}
 }
 
-// HTTP allows to communicate over HTTP or HTTPS.
-type HTTP struct {
+// HTTPClient allows to communicate over HTTPClient or HTTPS.
+type HTTPClient struct {
 	secure,
 	insecure *http.Client
 	skipSec []string
 }
 
-// ClientFor returns the HTTP client to use for this rawURL.
-func (c *HTTP) ClientFor(path string) HTTPClient {
+// ClientFor returns the HTTPClient client to use for this rawURL.
+func (c *HTTPClient) ClientFor(path string) Client {
 	if c.AllowInsecure(path) {
 		return c.insecure
 	}
@@ -44,7 +44,7 @@ func (c *HTTP) ClientFor(path string) HTTPClient {
 }
 
 // AllowInsecure returns true if this rawURL allows insecure request.
-func (c *HTTP) AllowInsecure(name string) bool {
+func (c *HTTPClient) AllowInsecure(name string) bool {
 	if name == "" {
 		return false
 	}
@@ -57,7 +57,7 @@ func (c *HTTP) AllowInsecure(name string) bool {
 	return false
 }
 
-// newInsecureHTTPClient returns a HTTP client that allows plain HTTP and skips HTTPS validation.
+// newInsecureHTTPClient returns a HTTPClient client that allows plain HTTPClient and skips HTTPS validation.
 func newInsecureHTTPClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: timeout,
@@ -70,7 +70,7 @@ func newInsecureHTTPClient(timeout time.Duration) *http.Client {
 	}
 }
 
-// newSecureHTTPClient returns a HTTP client that rejects redirection from HTTPS to HTTP and validate HTTPS.
+// newSecureHTTPClient returns a HTTPClient client that rejects redirection from HTTPS to HTTPClient and validate HTTPS.
 func newSecureHTTPClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: timeout,

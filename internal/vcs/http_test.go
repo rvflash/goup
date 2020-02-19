@@ -61,7 +61,7 @@ func TestHTTP_ClientFor(t *testing.T) {
 	are.NoErr(err)
 	are.NoErr(cli.ClientFor(repo).(*http.Client).CheckRedirect(req, []*http.Request{req2})) // expected no error
 
-	// HTTPS > HTTP
+	// HTTPS > HTTPClient
 	req2, err = http.NewRequest("GET", "http://"+repo+"/new", nil)
 	are.NoErr(err)
 	are.True(cli.ClientFor(repo).(*http.Client).CheckRedirect(req2, []*http.Request{req}) != nil) // expected error

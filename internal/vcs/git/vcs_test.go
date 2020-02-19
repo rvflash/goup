@@ -25,8 +25,8 @@ const (
 )
 
 func TestVCS_CanFetch(t *testing.T) {
-	var vcs git.VCS
-	is.New(t).True(vcs.CanFetch("")) // always true.
+	var s git.VCS
+	is.New(t).True(s.CanFetch("")) // always true.
 }
 
 func TestVCS_FetchPath(t *testing.T) {
@@ -90,5 +90,6 @@ func TestVCS_FetchURL(t *testing.T) {
 func newMockClientChooser(ctrl *gomock.Controller) *mock_vcs.MockClientChooser {
 	c := mock_vcs.NewMockClientChooser(ctrl)
 	c.EXPECT().ClientFor(pkgName).Return(&http.Client{}).AnyTimes()
+	c.EXPECT().AllowInsecure(pkgName).Return(false).AnyTimes()
 	return c
 }

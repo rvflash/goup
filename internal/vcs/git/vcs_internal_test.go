@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
+	"github.com/rvflash/goup/internal/vcs"
 )
 
 const (
@@ -48,10 +49,10 @@ func TestTransport_RawURL(t *testing.T) {
 			out string
 		}{
 			"default": {out: repo},
-			"ssh":     {in: transport{protocol: "ssh://git@"}, out: "ssh://git@example.com/group/pkg"},
-			"https":   {in: transport{protocol: "https://"}, out: "https://example.com/group/pkg"},
-			"http":    {in: transport{protocol: "http://", extension: ext}, out: "http://example.com/group/pkg.git"},
-			"git":     {in: transport{protocol: "git://", extension: ext}, out: "git://example.com:group/pkg.git"},
+			"ssh":     {in: transport{scheme: vcs.SSHGit}, out: "ssh://git@example.com/group/pkg"},
+			"https":   {in: transport{scheme: vcs.HTTPS}, out: "https://example.com/group/pkg"},
+			"http":    {in: transport{scheme: vcs.HTTP, extension: ext}, out: "http://example.com/group/pkg.git"},
+			"git":     {in: transport{scheme: vcs.Git, extension: ext}, out: "git://example.com:group/pkg.git"},
 		}
 	)
 	for name, tt := range dt {

@@ -79,13 +79,6 @@ func TestVCS_FetchPath(t *testing.T) {
 				ctx: context.Background(),
 				err: errors.ErrRepository,
 			},
-			"invalid calls": {
-				cli:  newMockClientChooser(ctrl, errors.ErrFetch),
-				git:  mock_vcs.NewMockSystem(ctrl),
-				ctx:  context.Background(),
-				path: pkgName,
-				err:  errors.ErrFetch,
-			},
 			"ok": {
 				cli:  newMockClientChooser(ctrl, nil),
 				git:  newMockSystem(ctrl),
@@ -120,7 +113,7 @@ func TestVCS_FetchURL(t *testing.T) {
 			err error
 		}{
 			"default":     {err: errors.ErrSystem},
-			"http only":   {cli: mock_vcs.NewMockClientChooser(ctrl), err: errors.ErrSystem},
+			"client only": {cli: mock_vcs.NewMockClientChooser(ctrl), err: errors.ErrSystem},
 			"system only": {git: mock_vcs.NewMockSystem(ctrl), err: errors.ErrSystem},
 			"missing context": {
 				cli: mock_vcs.NewMockClientChooser(ctrl),
@@ -170,14 +163,13 @@ const oneTime = 1
 
 func newMockClientChooser(ctrl *gomock.Controller, err error) *mock_vcs.MockClientChooser {
 	var (
-		c  = mock_vcs.NewMockClientChooser(ctrl)
-		m  = &mockClient{err: err}
-		cc = c.EXPECT().ClientFor(gomock.Any()).Return(m)
+		c = mock_vcs.NewMockClientChooser(ctrl)
+		m = &mockClient{err: err}
 	)
 	if err != nil {
-		cc.AnyTimes()
+		c.EXPECT().ClientFor(gomock.Any()).Return(m).AnyTimes()
 	} else {
-		cc.Times(oneTime)
+		c.EXPECT().ClientFor(gomock.Any()).Return(m).Times(oneTime)
 	}
 	return c
 }

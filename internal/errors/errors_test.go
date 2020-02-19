@@ -19,6 +19,13 @@ func TestNewCharset(t *testing.T) {
 	is.New(t).Equal(uperrs.NewCharset(charset).Error(), "unsupported charset: "+charset)
 }
 
+func TestNewSecurityIssue(t *testing.T) {
+	is.New(t).Equal(
+		uperrs.NewSecurityIssue("http://example.com").Error(),
+		"unsecured call to http://example.com cancelled: failed to list tags",
+	)
+}
+
 func TestNewMissingData(t *testing.T) {
 	var (
 		err = uperrs.NewMissingData(charset)

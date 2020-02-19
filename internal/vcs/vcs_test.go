@@ -12,6 +12,29 @@ import (
 	"github.com/rvflash/goup/internal/vcs"
 )
 
+func TestIsSecureScheme(t *testing.T) {
+	var (
+		are = is.New(t)
+		dt  = map[string]struct {
+			in  string
+			out bool
+		}{
+			"default": {},
+			"unknown": {in: "oops"},
+			"http":    {in: vcs.HTTP},
+			"git":     {in: vcs.Git},
+			"https":   {in: vcs.HTTPS, out: true},
+			"ssh+git": {in: vcs.SSHGit, out: true},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			are.Equal(vcs.IsSecureScheme(tt.in), tt.out) // mismatch result
+		})
+	}
+}
+
 func TestRepoPath(t *testing.T) {
 	var (
 		are = is.New(t)
@@ -23,4 +46,27 @@ func TestRepoPath(t *testing.T) {
 	uri, err = url.Parse("https://google.golang.org/appengine?go-get=1")
 	are.NoErr(err)
 	are.Equal(vcs.RepoPath(uri), "google.golang.org/appengine") // mismatch result
+}
+
+func TestURLScheme(t *testing.T) {
+	var (
+		are = is.New(t)
+		dt  = map[string]struct {
+			in  string
+			out string
+		}{
+			"default": {},
+			"unknown": {in: "oops"},
+			"git":     {in: vcs.Git, out: "git://"},
+			"http":    {in: vcs.HTTP, out: "http://"},
+			"https":   {in: vcs.HTTPS, out: "https://"},
+			"ssh+git": {in: vcs.SSHGit, out: "ssh://git@"},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			are.Equal(vcs.URLScheme(tt.in), tt.out) // mismatch result
+		})
+	}
 }

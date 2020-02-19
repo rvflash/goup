@@ -76,10 +76,11 @@ func (s *VCS) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
 func (s *VCS) fetchWithRetry(path string) (ref *reference) {
 	for _, t := range []transport{
 		// Secure
-		{protocol: "https://"},
-		{protocol: "ssh://git@"},
+		{scheme: vcs.HTTPS},
+		{scheme: vcs.SSHGit},
 		// Insecure
-		{protocol: "http://"},
+		{scheme: vcs.HTTP},
+		{scheme: vcs.Git},
 	} {
 		ref = s.fetch(t.rawURL(path))
 		if ref.err == nil {
@@ -89,15 +90,18 @@ func (s *VCS) fetchWithRetry(path string) (ref *reference) {
 	return
 }
 
-func (s *VCS) fetch(rawURL string) (ref *reference) {
-	ref = new(reference)
+func (s *VCS) fetch(rawURL string) *reference {
+	ref := new(reference)
 	u, err := url.ParseRequestURI(rawURL)
 	if err != nil {
 		ref.err = vcs.Errorf(Name, errors.ErrRepository, err)
-		return
+		return ref
 	}
-	// Override http(s) default protocol to use one dedicated to this package (insecure?).
-	// For now, it is not possible with git, the HTTP client is embedded and global set :/
+	// Security check
+	if !vcs.IsSecureScheme(u.Scheme) && !s.client.AllowInsecure(vcs.RepoPath(u)) {
+		ref.err = vcs.Errorf(Name, errors.ErrRepository, errors.NewSecurityIssue(u.String()))
+		return ref
+	}
 	rem := git.NewRemote(s.storage, &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{u.String()},
@@ -107,7 +111,7 @@ func (s *VCS) fetch(rawURL string) (ref *reference) {
 	res, err = rem.List(&git.ListOptions{})
 	if err != nil {
 		ref.err = vcs.Errorf(Name, errors.ErrFetch, err)
-		return
+		return ref
 	}
 	// Filters to keep only tag.
 	var n plumbing.ReferenceName
@@ -117,7 +121,7 @@ func (s *VCS) fetch(rawURL string) (ref *reference) {
 			ref.list = append(ref.list, semver.New(n.Short()))
 		}
 	}
-	return
+	return ref
 }
 
 func (s *VCS) ready(ctx context.Context) bool {
@@ -142,7 +146,6 @@ func tags(ctx context.Context, c chan *reference) (semver.Tags, error) {
 }
 
 const (
-	gitScheme = "git://"
 	// example.com/group/pkg, so with 2 slashes: 3 parts
 	stdNumPart = 3
 	slash      = "/"
@@ -150,19 +153,19 @@ const (
 )
 
 type transport struct {
-	protocol  string
+	scheme    string
 	extension string
 }
 
 func (t transport) rawURL(uri string) string {
 	p := strings.Split(uri, slash)
 	if len(p) > stdNumPart {
+		// Works around with sub-packages.
 		uri = path.Join(p[:stdNumPart]...)
 	}
-	if t.protocol == gitScheme {
-		if len(p) > 1 {
-			uri = p[0] + twoDot + path.Join(p[1:]...)
-		}
+	if t.scheme == vcs.Git && len(p) > 1 {
+		// Manages git url format.
+		uri = p[0] + twoDot + path.Join(p[1:]...)
 	}
-	return t.protocol + uri + t.extension
+	return vcs.URLScheme(t.scheme) + uri + t.extension
 }

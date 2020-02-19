@@ -76,8 +76,8 @@ func (s *VCS) vcsByPath(ctx context.Context, path string) (name, remote string, 
 	if path == "" {
 		return "", "", errors.ErrRepository
 	}
-	for _, protocol := range []string{"https://", "http://"} {
-		name, remote, err = s.vcsByURL(ctx, protocol+path)
+	for _, scheme := range []string{vcs.HTTPS, vcs.HTTP} {
+		name, remote, err = s.vcsByURL(ctx, vcs.URLScheme(scheme)+path)
 		if err == nil {
 			break
 		}
@@ -99,6 +99,9 @@ func (s *VCS) vcsByURL(ctx context.Context, url string) (name, remote string, er
 	}
 	setQuery(req.URL)
 
+	if !vcs.IsSecureScheme(req.URL.Scheme) && !s.http.AllowInsecure(vcs.RepoPath(req.URL)) {
+		return "", "", errors.NewSecurityIssue(req.URL.String())
+	}
 	var resp *http.Response
 	resp, err = s.http.ClientFor(vcs.RepoPath(req.URL)).Do(req)
 	if err != nil {

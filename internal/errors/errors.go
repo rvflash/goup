@@ -15,6 +15,11 @@ func NewCharset(charset string) error {
 	return errors.New("unsupported charset: " + charset)
 }
 
+// NewSecurityIssue returns a ne security issue based on the given url.
+func NewSecurityIssue(url string) error {
+	return fmt.Errorf("unsecured call to %s cancelled: %w", url, ErrFetch)
+}
+
 // NewMissingData returns the data is missing.
 func NewMissingData(name string) error {
 	return fmt.Errorf("%s: %w", name, ErrMissing)
