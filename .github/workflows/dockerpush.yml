@@ -43,17 +43,16 @@ jobs:
     name: Dockerhub publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Login to DockerHub Registry
-        run: echo ${{secrets.DOCKER_PASSWORD}} | docker login -u ${{secrets.DOCKER_USERNAME}} --password-stdin
-      - name: Get the latest tag
-        id: vars
-        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
-      - name: Build the tagged Docker image
-        run: docker build . --file Dockerfile --tag rvflash/goup:${{steps.vars.outputs.tag}}
-      - name: Push the tagged Docker image
-        run: docker push rvflash/goup:${{steps.vars.outputs.tag}}
-      - name: Build the latest Docker image
-        run: docker build . --file Dockerfile --tag rvflash/goup:latest
-      - name: Push the latest Docker image
-        run: docker push rvflash/goup:latest
+      - name: Latest tag
+        run: echo ::set-env name=APP_VERSION::${GITHUB_REF##*/}
+      - uses: actions/checkout@v2.0.0
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        env:
+          APP_VERSION: ${{env.APP_VERSION}}
+        with:
+          name: rvflash/goup
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+          buildargs: APP_VERSION
+          tags: "latest,${{env.APP_VERSION}}"
