@@ -1,0 +1,4 @@
+.idea
+coverage.txt
+/goup
+/testdata/**/go.sum
