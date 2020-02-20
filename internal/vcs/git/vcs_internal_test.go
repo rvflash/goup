@@ -13,10 +13,7 @@ import (
 	"github.com/rvflash/goup/internal/vcs"
 )
 
-const (
-	ext  = ".git"
-	repo = "example.com/group/pkg"
-)
+const repo = "example.com/group/pkg"
 
 func TestTags(t *testing.T) {
 	are := is.New(t)
@@ -49,10 +46,10 @@ func TestTransport_RawURL(t *testing.T) {
 			out string
 		}{
 			"default": {out: repo},
-			"ssh":     {in: transport{scheme: vcs.SSHGit}, out: "ssh://git@example.com/group/pkg"},
+			"ssh":     {in: transport{scheme: vcs.SSHGit, extension: Ext}, out: "ssh://git@example.com/group/pkg.git"},
 			"https":   {in: transport{scheme: vcs.HTTPS}, out: "https://example.com/group/pkg"},
-			"http":    {in: transport{scheme: vcs.HTTP, extension: ext}, out: "http://example.com/group/pkg.git"},
-			"git":     {in: transport{scheme: vcs.Git, extension: ext}, out: "git://example.com:group/pkg.git"},
+			"http":    {in: transport{scheme: vcs.HTTP}, out: "http://example.com/group/pkg"},
+			"git":     {in: transport{scheme: vcs.Git, extension: Ext}, out: "git://example.com/group/pkg.git"},
 		}
 	)
 	for name, tt := range dt {

@@ -22,8 +22,12 @@ import (
 	"github.com/rvflash/goup/internal/vcs"
 )
 
-// Name is the name of this VCS.
-const Name = "git"
+const (
+	// Name is the name of this VCS.
+	Name = "git"
+	// Ext of a git repository.
+	Ext = ".git"
+)
 
 // VCS is a Git PrintVersion Control VCS.
 type VCS struct {
@@ -77,10 +81,10 @@ func (s *VCS) fetchWithRetry(path string) (ref *reference) {
 	for _, t := range []transport{
 		// Secure
 		{scheme: vcs.HTTPS},
-		{scheme: vcs.SSHGit},
+		{scheme: vcs.SSHGit, extension: Ext},
 		// Insecure
+		{scheme: vcs.Git, extension: Ext},
 		{scheme: vcs.HTTP},
-		{scheme: vcs.Git},
 	} {
 		ref = s.fetch(t.rawURL(path))
 		if ref.err == nil {
@@ -149,7 +153,6 @@ const (
 	// example.com/group/pkg, so with 2 slashes: 3 parts
 	stdNumPart = 3
 	slash      = "/"
-	twoDot     = ":"
 )
 
 type transport struct {
@@ -162,10 +165,6 @@ func (t transport) rawURL(uri string) string {
 	if len(p) > stdNumPart {
 		// Works around with sub-packages.
 		uri = path.Join(p[:stdNumPart]...)
-	}
-	if t.scheme == vcs.Git && len(p) > 1 {
-		// Manages git url format.
-		uri = p[0] + twoDot + path.Join(p[1:]...)
 	}
 	return vcs.URLScheme(t.scheme) + uri + t.extension
 }

@@ -76,6 +76,12 @@ no prerelease.
 
 `[modfiles]` can be one or more direct path to `go.mod` files, `.` or `./...` to get all those in the tree.
 
+Using example with an auto-signed local git repository:
+
+```shell script
+GOINSECURE="gitlab.example.lan/*/*" goup -v .
+```
+
 
 ## Soon
 
