@@ -1,0 +1,32 @@
+linters:
+  enable-all: true
+  disable:
+    - wsl
+    - godox
+    - gomnd
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - gochecknoglobals
+        - funlen
+        - dupl
+    - path: main\.go
+      text: "`buildVersion` is a global variable"
+      linters:
+        - gochecknoglobals
+    - path: internal/mod/file\.go
+      text: "G304: Potential file inclusion via variable"
+      linters:
+        - gosec
+    - path: internal/app/app_test\.go
+      text: "SA1012: do not pass a nil Context"
+      linters:
+        - staticcheck
+    - path: internal/vcs/http\.go
+      text: "G402: TLS InsecureSkipVerify set true."
+      linters:
+        - gosec
