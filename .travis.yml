@@ -5,15 +5,15 @@ go:
 
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=1
 
 before_install:
   - go get -t -v ./...
-  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.23.1
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.23.6
 
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
-  - go mod download
-  - golangci-lint run
+  - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+  - golangci-lint run ./...
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
