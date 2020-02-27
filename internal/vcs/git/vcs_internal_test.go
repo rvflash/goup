@@ -13,7 +13,10 @@ import (
 	"github.com/rvflash/goup/internal/vcs"
 )
 
-const repo = "example.com/group/pkg"
+const (
+	repo    = "example.com/group/pkg"
+	subRepo = "example.com/group/pkg/submodule"
+)
 
 func TestTags(t *testing.T) {
 	are := is.New(t)
@@ -58,4 +61,8 @@ func TestTransport_RawURL(t *testing.T) {
 			are.Equal(tt.in.rawURL(repo), tt.out) // mismatch result
 		})
 	}
+}
+
+func TestTransport_RawURL2(t *testing.T) {
+	is.New(t).Equal(transport{}.rawURL(subRepo), repo)
 }

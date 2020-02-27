@@ -16,6 +16,8 @@ import (
 	"github.com/rvflash/goup/internal/mod"
 )
 
+const numDep = 14
+
 func TestOpen(t *testing.T) {
 	var (
 		are = is.New(t)
@@ -32,7 +34,7 @@ func TestOpen(t *testing.T) {
 			"valid go.mod": {
 				in:     []string{"..", "..", "testdata", "golden", "valid", mod.Filename},
 				module: "github.com/rvflash/goup",
-				depLen: 15,
+				depLen: numDep,
 			},
 		}
 	)
