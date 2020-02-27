@@ -6,7 +6,6 @@ package mod_test
 
 import (
 	"errors"
-	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -42,7 +41,6 @@ func TestOpen(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			out, err := mod.Parse(filepath.Join(tt.in...))
-			fmt.Println(err)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 			if tt.err == nil {
 				are.Equal(out.Module(), tt.module)            // mismatch module
