@@ -7,12 +7,12 @@ package git_test
 import (
 	"context"
 	"errors"
-	"net/http"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
+
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	pkgName = "github.com/src-d/go-git"
-	repoURL = "https://github.com/src-d/go-git"
+	pkgName   = "github.com/src-d/go-git"
+	repoURL   = "https://github.com/src-d/go-git"
+	unsafeURL = "http://github.com/src-d/go-git"
 )
 
 func TestVCS_CanFetch(t *testing.T) {
@@ -71,10 +72,11 @@ func TestVCS_FetchURL(t *testing.T) {
 			in  string
 			err error
 		}{
-			"default":         {err: errup.ErrSystem},
-			"missing context": {cli: mock_vcs.NewMockClientChooser(ctrl), in: repoURL, err: errup.ErrSystem},
-			"missing url":     {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
-			"ok":              {cli: newMockClientChooser(ctrl), ctx: ctx, in: repoURL},
+			"Default":         {err: errup.ErrSystem},
+			"Missing context": {cli: mock_vcs.NewMockClientChooser(ctrl), in: repoURL, err: errup.ErrSystem},
+			"Missing url":     {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
+			"Invalid":         {cli: newMockClientChooser(ctrl), ctx: ctx, in: unsafeURL, err: errup.ErrRepository},
+			"Ok":              {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, in: repoURL},
 		}
 	)
 	for name, tt := range dt {
@@ -89,7 +91,6 @@ func TestVCS_FetchURL(t *testing.T) {
 
 func newMockClientChooser(ctrl *gomock.Controller) *mock_vcs.MockClientChooser {
 	c := mock_vcs.NewMockClientChooser(ctrl)
-	c.EXPECT().ClientFor(pkgName).Return(&http.Client{}).AnyTimes()
 	c.EXPECT().AllowInsecure(pkgName).Return(false).AnyTimes()
 	return c
 }

@@ -35,12 +35,13 @@ func TestVCS_CanFetch(t *testing.T) {
 			in  string
 			out bool
 		}{
-			"default":    {in: ""},
-			"invalid":    {in: "org"},
-			"incomplete": {in: "golang"},
-			"wrong":      {in: "github.com/golang/mock"},
-			"complete":   {in: "golang.org", out: true},
-			"package":    {in: pkgName, out: true},
+			"Default":               {in: ""},
+			"Ignore Bitbucket":      {in: "bitbucket.org/repo/all"},
+			"Ignore private Gitlab": {in: "gitlab.example.lan/group/pkg"},
+			"Ignore public Gitlab":  {in: "gitlab.com/group/pkg"},
+			"Ignore Github":         {in: "github.com/golang/mock"},
+			"Incomplete":            {in: "golang.org", out: true},
+			"Ok":                    {in: pkgName, out: true},
 		}
 	)
 	for name, tt := range dt {
