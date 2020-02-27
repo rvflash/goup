@@ -39,6 +39,9 @@ func New(client vcs.ClientChooser, git vcs.System) *VCS {
 
 // CanFetch implements the vcs.VCS interface.
 func (s *VCS) CanFetch(path string) bool {
+	if path == "" {
+		return false
+	}
 	for _, service := range []string{"github.com", "gitlab", "bitbucket"} {
 		if strings.Contains(path, service) {
 			return false

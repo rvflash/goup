@@ -29,8 +29,28 @@ const (
 func TestVCS_CanFetch(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	s := goget.New(mock_vcs.NewMockClientChooser(ctrl), mock_vcs.NewMockSystem(ctrl))
-	is.New(t).Equal(s.CanFetch(""), true)
+	var (
+		are = is.New(t)
+		dt  = map[string]struct {
+			in  string
+			out bool
+		}{
+			"Default":               {in: ""},
+			"Ignore Bitbucket":      {in: "bitbucket.org/repo/all"},
+			"Ignore private Gitlab": {in: "gitlab.example.lan/group/pkg"},
+			"Ignore public Gitlab":  {in: "gitlab.com/group/pkg"},
+			"Ignore Github":         {in: "github.com/golang/mock"},
+			"Incomplete":            {in: "golang.org", out: true},
+			"Ok":                    {in: pkgName, out: true},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			s := goget.New(mock_vcs.NewMockClientChooser(ctrl), mock_vcs.NewMockSystem(ctrl))
+			are.Equal(s.CanFetch(tt.in), tt.out) // mismatch fetch
+		})
+	}
 }
 
 func TestVCS_FetchPath(t *testing.T) {
