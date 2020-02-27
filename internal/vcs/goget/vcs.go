@@ -39,7 +39,15 @@ func New(client vcs.ClientChooser, git vcs.System) *VCS {
 
 // CanFetch implements the vcs.VCS interface.
 func (s *VCS) CanFetch(path string) bool {
-	return strings.Contains(path, "golang.org")
+	if path == "" {
+		return false
+	}
+	for _, service := range []string{"github.com", "gitlab", "bitbucket"} {
+		if strings.Contains(path, service) {
+			return false
+		}
+	}
+	return true
 }
 
 // FetchPath implements the vcs.VCS interface.
@@ -99,6 +107,7 @@ func (s *VCS) vcsByURL(ctx context.Context, url string) (name, remote string, er
 	}
 	setQuery(req.URL)
 
+	// Security check
 	if !vcs.IsSecureScheme(req.URL.Scheme) && !s.http.AllowInsecure(vcs.RepoPath(req.URL)) {
 		return "", "", errors.NewSecurityIssue(req.URL.String())
 	}

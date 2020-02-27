@@ -7,6 +7,7 @@ package mod
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/rvflash/goup/internal/errors"
@@ -67,6 +68,12 @@ func (f *File) Dependencies() []Module {
 func dependencies(f *modfile.File) []Module {
 	var m = make(map[string]Module)
 	for _, r := range f.Replace {
+		// Ignores local replacements. like:
+		// => ../vendor/example.com/group/pkg
+		_, err := os.Stat(r.New.Path)
+		if !os.IsNotExist(err) {
+			continue
+		}
 		m[r.Old.Path] = &module{
 			path:    r.New.Path,
 			version: semver.New(r.New.Version),

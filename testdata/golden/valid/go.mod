@@ -21,4 +21,4 @@ require (
 
 exclude github.com/golang/mock v1.5.0
 
-replace github.com/matryer/is => example.com/c v1.0.0
+replace google.golang.org/grpc => ../tree
