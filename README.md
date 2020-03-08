@@ -23,7 +23,7 @@ major+minor and by default, path.
 1. Allows the capacity to force some modules to only use release tag, no prerelease.
 1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
 1. As with go1.14, you can use the `GOINSECURE` environment variable to skip certificate validation and do
-not require an HTTPS connection.
+not require an HTTPS connection. Since version `v0.3.0`, `GOPRIVATE` has the same behavior. 
 
 
 ## Demo
@@ -45,13 +45,13 @@ on the [releases page](https://github.com/rvflash/goup/releases).
 ### Go
 
 ```shell script
-GO111MODULE=on go get github.com/rvflash/goup@v0.2.0
+GO111MODULE=on go get github.com/rvflash/goup@v0.3.0
 ```
 
 ### Docker
 
 ```shell script1
-docker run --rm -v $(pwd):/pkg rvflash/goup:v0.2.0 goup -V
+docker run --rm -v $(pwd):/pkg rvflash/goup:v0.3.0 goup -V
 ```
 
 ## Usage
