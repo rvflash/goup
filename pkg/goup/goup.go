@@ -6,13 +6,12 @@ package goup
 
 import (
 	"context"
-	"path"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/mod"
+	"github.com/rvflash/goup/internal/path"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
@@ -159,18 +158,9 @@ func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool
 	return v, v != nil
 }
 
-const sep = ","
-
 func onlyTag(d mod.Module, globs string) error {
-	var matched bool
-	for _, glob := range strings.Split(globs, sep) {
-		if glob = strings.TrimSpace(glob); glob == "" {
-			continue
-		}
-		matched, _ = path.Match(glob, d.Path())
-		if matched && !d.Version().IsTag() {
-			return errors.ErrExpectedTag
-		}
+	if path.Match(globs, d.Path()) && !d.Version().IsTag() {
+		return errors.ErrExpectedTag
 	}
 	return nil
 }
