@@ -2,8 +2,6 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
-// +build !race
-
 package main
 
 import (
@@ -17,6 +15,25 @@ import (
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/pkg/goup"
 )
+
+func TestPatterns(t *testing.T) {
+	var (
+		are = is.New(t)
+		dt  = map[string]struct {
+			in  []string
+			out string
+		}{
+			"Default": {},
+			"Ok":      {in: []string{"a", "b", "", "d", " e "}, out: "a,b,d,e"},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			are.Equal(tt.out, patterns(tt.in...)) // mismatch result
+		})
+	}
+}
 
 func TestRun(t *testing.T) {
 	var (

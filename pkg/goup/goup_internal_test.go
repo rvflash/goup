@@ -208,18 +208,20 @@ func TestOnlyTag(t *testing.T) {
 			paths string
 			err   error
 		}{
-			"default": {dep: mock_mod.NewMockModule(ctrl)},
-			"invalid glob pattern": {
-				dep:   newTag(ctrl, "v1.0.0-b42", 1),
-				paths: "example.com",
-			},
-			"valid glob pattern": {
-				dep:   newTag(ctrl, "v1.0.0-b42", 1),
+			"Default":              {dep: newTag(ctrl, "")},
+			"Invalid glob pattern": {dep: newTag(ctrl, "v1.0.0-b42"), paths: "another.com"},
+			"Valid glob pattern": {
+				dep:   newTag(ctrl, "v1.0.0-b42"),
 				paths: "example.com/*/*",
 				err:   errup.ErrExpectedTag,
 			},
-			"skip": {dep: newTag(ctrl, "v1.0.0", 2), paths: "test,,example.com"},
-			"ok":   {dep: newTag(ctrl, "v1.0.0", 1), paths: "example.com/pkg/*"},
+			"Skip": {dep: newTag(ctrl, "v1.0.0"), paths: "test,,example.com"},
+			"Valid prefix": {
+				dep:   newTag(ctrl, "v1.0.0-b42"),
+				paths: "example.com",
+				err:   errup.ErrExpectedTag,
+			},
+			"Ok": {dep: newTag(ctrl, "v1.0.0"), paths: "example.com/pkg/*"},
 		}
 	)
 	for name, tt := range dt {
@@ -253,9 +255,9 @@ func newTip(msg string) []Tip {
 	return []Tip{&tip{msg: msg}}
 }
 
-func newTag(ctrl *gomock.Controller, v string, times int) *mock_mod.MockModule {
+func newTag(ctrl *gomock.Controller, v string) *mock_mod.MockModule {
 	d := mock_mod.NewMockModule(ctrl)
-	d.EXPECT().Path().Return(repoName).Times(times)
+	d.EXPECT().Path().Return(repoName).Times(oneTime)
 	d.EXPECT().Version().Return(semver.New(v)).AnyTimes()
 	return d
 }

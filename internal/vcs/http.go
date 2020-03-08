@@ -8,23 +8,19 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"path"
-	"strings"
 	"time"
+
+	"github.com/rvflash/goup/internal/path"
 )
 
-const (
-	comma = ","
-	https = "https"
-)
+const https = "https"
 
 // NewHTTPClient creates a new instance of Client.
-func NewHTTPClient(timeout time.Duration, goInsecure string) *HTTPClient {
-	skipSec := strings.Split(goInsecure, comma)
+func NewHTTPClient(timeout time.Duration, insecurePaths string) *HTTPClient {
 	return &HTTPClient{
-		insecure: newInsecureHTTPClient(timeout),
-		secure:   newSecureHTTPClient(timeout),
-		skipSec:  skipSec,
+		insecure:      newInsecureHTTPClient(timeout),
+		secure:        newSecureHTTPClient(timeout),
+		insecurePaths: insecurePaths,
 	}
 }
 
@@ -32,7 +28,7 @@ func NewHTTPClient(timeout time.Duration, goInsecure string) *HTTPClient {
 type HTTPClient struct {
 	secure,
 	insecure *http.Client
-	skipSec []string
+	insecurePaths string
 }
 
 // ClientFor returns the HTTPClient client to use for this rawURL.
@@ -44,17 +40,8 @@ func (c *HTTPClient) ClientFor(path string) Client {
 }
 
 // AllowInsecure returns true if this rawURL allows insecure request.
-func (c *HTTPClient) AllowInsecure(name string) bool {
-	if name == "" {
-		return false
-	}
-	var matched bool
-	for _, pattern := range c.skipSec {
-		if matched, _ = path.Match(pattern, name); matched {
-			return true
-		}
-	}
-	return false
+func (c *HTTPClient) AllowInsecure(target string) bool {
+	return path.Match(c.insecurePaths, target)
 }
 
 // newInsecureHTTPClient returns a HTTPClient client that allows plain HTTPClient and skips HTTPS validation.
