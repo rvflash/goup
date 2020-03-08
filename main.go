@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/rvflash/goup/internal/app"
@@ -22,15 +23,17 @@ import (
 var buildVersion string
 
 const (
+	comma      = ","
 	errorCode  = 1
 	goInsecure = "GOINSECURE"
+	goPrivate  = "GOPRIVATE"
 	timeout    = 10 * time.Second
 )
 
 func main() {
 	var (
 		c = goup.Config{
-			InsecurePatterns: os.Getenv(goInsecure),
+			InsecurePatterns: patterns(os.Getenv(goInsecure), os.Getenv(goPrivate)),
 		}
 		s = "exclude indirect modules"
 	)
@@ -62,6 +65,16 @@ func main() {
 		}
 		os.Exit(errorCode)
 	}
+}
+
+func patterns(v ...string) string {
+	var a []string
+	for _, s := range v {
+		if s = strings.TrimSpace(s); s != "" {
+			a = append(a, s)
+		}
+	}
+	return strings.Join(a, comma)
 }
 
 func run(ctx context.Context, cnf goup.Config, args []string, stdout, stderr io.Writer) error {
