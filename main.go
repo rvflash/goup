@@ -27,7 +27,7 @@ const (
 	errorCode  = 1
 	goInsecure = "GOINSECURE"
 	goPrivate  = "GOPRIVATE"
-	timeout    = 10 * time.Second
+	timeout    = time.Minute
 )
 
 func main() {
@@ -48,9 +48,8 @@ func main() {
 	flag.StringVar(&c.OnlyReleases, "r", "", s)
 	s = "maximum time duration"
 	flag.DurationVar(&c.Timeout, "t", timeout, s)
-	// todo next release
-	//s = "force the update of the go.mod file as advised"
-	//flag.BoolVar(&c.Force, "f", false, s)
+	s = "force the update of the go.mod file as advised"
+	flag.BoolVar(&c.ForceUpdate, "f", false, s)
 	s = "verbose output"
 	flag.BoolVar(&c.Verbose, "v", false, s)
 	s = "print version"

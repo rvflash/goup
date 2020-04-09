@@ -19,6 +19,8 @@ require (
 	google.golang.org/grpc v1.23.1
 )
 
+exclude github.com/rvflash/goup v0.1.0
+
 exclude github.com/golang/mock v1.5.0
 
 replace google.golang.org/grpc => ../tree

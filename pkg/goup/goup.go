@@ -37,7 +37,7 @@ func Check(ctx context.Context, file mod.Mod, conf Config) []Tip {
 	return New(conf).CheckFile(ctx, file, conf)
 }
 
-// Checker must be implemented to check updates on go mod file or module.
+// Checker must be implemented to check updates on go.mod file or module.
 type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
 
 // Setter defines the interface used to set settings.
@@ -74,7 +74,7 @@ func New(conf Config, sets ...Setter) *GoUp {
 	return u
 }
 
-// GoUp allows to check a go.mod file with each of these dependencies.
+// GoUp allows to check a go.dep file with each of these dependencies.
 type GoUp struct {
 	git, goGet vcs.System
 }
@@ -82,6 +82,8 @@ type GoUp struct {
 const delta = 1
 
 // CheckFile verifies the given go.mod file based on this configuration.
+// Regarding the configuration, it applies any update advices to the go.mod file.
+// If one or more checks failed, the update is cancelled.
 // It's implements the Checker interface.
 func (u *GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
 	up := &updates{Mod: file}
@@ -97,15 +99,29 @@ func (u *GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) []Ti
 		go func(d mod.Module) {
 			defer w8.Done()
 			adv, err := u.CheckModule(ctx, d, conf)
-			if err != nil {
+			switch e := err.(type) {
+			case nil:
+				up.could(adv)
+			case *errors.OutOfDate:
+				if !conf.ForceUpdate {
+					up.must(err)
+					return
+				}
+				if d.Replacement() {
+					up.must(file.UpdateReplace(e.Mod, e.NewVersion))
+				} else {
+					up.must(file.UpdateRequire(e.Mod, e.NewVersion))
+				}
+			default:
 				up.must(err)
-				return
 			}
-			up.could(adv)
 		}(d)
 	}
 	w8.Wait()
 
+	if !up.failed() && conf.ForceUpdate {
+		up.must(file.UpdateAndSave())
+	}
 	return up.tips()
 }
 
@@ -123,22 +139,26 @@ func (u *GoUp) CheckModule(ctx context.Context, dep mod.Module, conf Config) (st
 		}
 		vs, err := system.FetchPath(ctx, dep.Path())
 		if err != nil {
-			return "", newError(dep, err)
+			return "", &errors.Failure{Mod: dep.Path(), Err: err}
+		}
+		x, ok := dep.ExcludeVersion()
+		if ok {
+			vs = vs.Not(x)
 		}
 		v, ok := latest(vs, dep, conf)
 		if !ok {
 			return checked(dep), nil
 		}
 		if semver.Compare(dep.Version(), v) < 0 {
-			return "", newOrder(dep, v.String())
+			return "", &errors.OutOfDate{Mod: dep.Path(), OldVersion: dep.Version().String(), NewVersion: v.String()}
 		}
 		err = onlyTag(dep, conf.OnlyReleases)
 		if err != nil {
-			return "", newError(dep, err)
+			return "", &errors.Failure{Mod: dep.Path(), Err: err}
 		}
 		return checked(dep), nil
 	}
-	return "", newError(dep, errors.ErrSystem)
+	return "", &errors.Failure{Mod: dep.Path(), Err: errors.ErrSystem}
 }
 
 func (u *GoUp) ready(ctx context.Context) bool {

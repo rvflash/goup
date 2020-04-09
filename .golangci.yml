@@ -14,6 +14,7 @@ issues:
         - gochecknoglobals
         - funlen
         - dupl
+        - gosec
     - path: main\.go
       text: "`buildVersion` is a global variable"
       linters:

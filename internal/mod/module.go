@@ -7,30 +7,46 @@ package mod
 
 import "github.com/rvflash/goup/internal/semver"
 
+//go:generate mockgen -destination ../../testdata/mock/mod/module.go -source module.go
+
 // Module represents a dependency.
 type Module interface {
 	Indirect() bool
 	Path() string
+	Replacement() bool
 	Version() semver.Tag
+	ExcludeVersion() (v semver.Tag, ok bool)
 }
 
 type module struct {
-	indirect bool
-	path     string
-	version  *semver.Version
+	indirect,
+	replacement bool
+	path string
+	excludeVersion,
+	version *semver.Version
 }
 
-// Indirect  implements the Module interface.
+// ExcludeVersion implements the module interface.
+func (m *module) ExcludeVersion() (v semver.Tag, ok bool) {
+	return m.excludeVersion, m.excludeVersion != nil
+}
+
+// Indirect implements the module interface.
 func (m *module) Indirect() bool {
 	return m.indirect
 }
 
-// Path  implements the Module interface.
+// Path implements the module interface.
 func (m *module) Path() string {
 	return m.path
 }
 
-// PrintVersion implements the Module interface.
+// Replacement implements the module interface.
+func (m *module) Replacement() bool {
+	return m.replacement
+}
+
+// Version implements the module interface.
 func (m *module) Version() semver.Tag {
 	return m.version
 }

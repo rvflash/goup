@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
+
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/mod"
 	"github.com/rvflash/goup/internal/semver"
@@ -61,7 +62,11 @@ func TestGoUp_CheckFile(t *testing.T) {
 				file: newMockMod(ctrl, []mod.Module{
 					newMockModule(ctrl, false),
 				}),
-				res: newErrTip(errors.New("example.com/group/go v1.0.2 must be updated with v1.0.3")),
+				res: newErrTip(&errup.OutOfDate{
+					Mod:        "example.com/group/go",
+					OldVersion: "v1.0.2",
+					NewVersion: "v1.0.3",
+				}),
 			},
 		}
 	)
@@ -144,6 +149,7 @@ func newMockModule(ctrl *gomock.Controller, indirect bool) *mock_mod.MockModule 
 	m.EXPECT().Path().Return(repoName).AnyTimes()
 	m.EXPECT().Version().Return(semver.New(release)).AnyTimes()
 	m.EXPECT().Indirect().Return(indirect).AnyTimes()
+	m.EXPECT().ExcludeVersion().Return(nil, false).AnyTimes()
 	return m
 }
 

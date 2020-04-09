@@ -60,3 +60,45 @@ func (mr *MockModMockRecorder) Dependencies() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dependencies", reflect.TypeOf((*MockMod)(nil).Dependencies))
 }
+
+// UpdateRequire mocks base method
+func (m *MockMod) UpdateRequire(path, version string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRequire", path, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRequire indicates an expected call of UpdateRequire
+func (mr *MockModMockRecorder) UpdateRequire(path, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequire", reflect.TypeOf((*MockMod)(nil).UpdateRequire), path, version)
+}
+
+// UpdateReplace mocks base method
+func (m *MockMod) UpdateReplace(oldPath, newVersion string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateReplace", oldPath, newVersion)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateReplace indicates an expected call of UpdateReplace
+func (mr *MockModMockRecorder) UpdateReplace(oldPath, newVersion interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReplace", reflect.TypeOf((*MockMod)(nil).UpdateReplace), oldPath, newVersion)
+}
+
+// UpdateAndSave mocks base method
+func (m *MockMod) UpdateAndSave() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAndSave")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAndSave indicates an expected call of UpdateAndSave
+func (mr *MockModMockRecorder) UpdateAndSave() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAndSave", reflect.TypeOf((*MockMod)(nil).UpdateAndSave))
+}

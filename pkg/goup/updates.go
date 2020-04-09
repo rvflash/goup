@@ -15,8 +15,9 @@ import (
 type updates struct {
 	mod.Mod
 
-	mu sync.RWMutex
-	rs []Tip
+	mu  sync.RWMutex
+	rs  []Tip
+	bad bool
 }
 
 func (up *updates) tips() []Tip {
@@ -32,7 +33,17 @@ func (up *updates) could(s string) {
 }
 
 func (up *updates) must(err error) {
+	if err == nil {
+		return
+	}
 	up.mu.Lock()
 	up.rs = append(up.rs, &tip{err: err})
+	up.bad = true
 	up.mu.Unlock()
+}
+
+func (up *updates) failed() bool {
+	up.mu.RLock()
+	defer up.mu.RUnlock()
+	return up.bad
 }

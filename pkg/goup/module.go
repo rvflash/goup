@@ -10,18 +10,11 @@ import (
 	"github.com/rvflash/goup/internal/mod"
 )
 
-func newError(module mod.Module, err error) error {
-	if module == nil || err == nil {
-		return nil
-	}
-	return fmt.Errorf("%s check failed: %w", module.Path(), err)
-}
-
-func newOrder(module mod.Module, msg string) error {
+func updated(module mod.Module) string {
 	if module == nil {
-		return nil
+		return ""
 	}
-	return fmt.Errorf("%s %s must be updated with %s", module.Path(), module.Version().String(), msg)
+	return fmt.Sprintf("%s %s was updated", module.Path(), module.Version().String())
 }
 
 func checked(module mod.Module) string {

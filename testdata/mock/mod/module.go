@@ -61,6 +61,20 @@ func (mr *MockModuleMockRecorder) Path() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Path", reflect.TypeOf((*MockModule)(nil).Path))
 }
 
+// Replacement mocks base method
+func (m *MockModule) Replacement() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Replacement")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Replacement indicates an expected call of Replacement
+func (mr *MockModuleMockRecorder) Replacement() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Replacement", reflect.TypeOf((*MockModule)(nil).Replacement))
+}
+
 // Version mocks base method
 func (m *MockModule) Version() semver.Tag {
 	m.ctrl.T.Helper()
@@ -73,4 +87,19 @@ func (m *MockModule) Version() semver.Tag {
 func (mr *MockModuleMockRecorder) Version() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Version", reflect.TypeOf((*MockModule)(nil).Version))
+}
+
+// ExcludeVersion mocks base method
+func (m *MockModule) ExcludeVersion() (semver.Tag, bool) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExcludeVersion")
+	ret0, _ := ret[0].(semver.Tag)
+	ret1, _ := ret[1].(bool)
+	return ret0, ret1
+}
+
+// ExcludeVersion indicates an expected call of ExcludeVersion
+func (mr *MockModuleMockRecorder) ExcludeVersion() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExcludeVersion", reflect.TypeOf((*MockModule)(nil).ExcludeVersion))
 }
