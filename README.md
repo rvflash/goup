@@ -9,10 +9,8 @@
 `goup` checks if there are any updates for imports in your module.
 It parses `go.mod` files to get dependencies with their version, uses [go-git](https://github.com/src-d/go-git) 
 to retrieve the list of remote tags and performs comparisons to advise to update if necessary.
-
-> For now, it doesn't update the go mod file. An option to force it is planned but for the moment,
-> the main purpose is using it as a linter in continuous integration or in development process.
-
+The main purpose is using it as a linter in continuous integration or in development process,
+but you can use it to keep updated the `go.mod` files, see the `-f` option.
 
 ## Features
 
