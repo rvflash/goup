@@ -43,13 +43,13 @@ on the [releases page](https://github.com/rvflash/goup/releases).
 ### Go
 
 ```shell script
-GO111MODULE=on go get github.com/rvflash/goup@v0.3.0
+GO111MODULE=on go get github.com/rvflash/goup@v0.4.0
 ```
 
 ### Docker
 
-```shell script1
-docker run --rm -v $(pwd):/pkg rvflash/goup:v0.3.0 goup -V
+```shell script
+docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.0 goup -V
 ```
 
 ## Usage
