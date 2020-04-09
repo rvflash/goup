@@ -24,7 +24,7 @@ major+minor and by default, path.
 1. Manages one or more `go.mod` files, for example with `./...` as parameter. 
 1. As with go1.14, you can use the `GOINSECURE` environment variable to skip certificate validation and do
 not require an HTTPS connection. Since version `v0.3.0`, `GOPRIVATE` has the same behavior. 
-
+1. Can amend on demand `go.mod` files with deprecated dependencies to update them.
 
 ## Demo
 
@@ -66,6 +66,7 @@ It supports the following flags:
 * `-M`: ensures to have the latest major version. By default: only the path is challenged.
 * `-m`: ensures to have the latest couple major with minor version. By default: only the path is challenged.
 * `-V`: prints the version of the tool.
+* `-f`: force the update of the go.mod file as advised
 * `-i`: allows to exclude indirect modules.
 * `-r`: it's a comma-separated list of glob patterns to match the repository paths where to force tag usage.
 For example with `github.com/group/*` as value, any modules in this repository group must have a release tag,
@@ -81,8 +82,3 @@ Using example with an auto-signed local git repository:
 ```shell script
 GOINSECURE="gitlab.example.lan/*/*" goup -v .
 ```
-
-
-## Soon
-
-An option `-f` will be available to force updates of the go.mod file as recommended.
