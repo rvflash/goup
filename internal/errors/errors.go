@@ -10,37 +10,6 @@ import (
 	"fmt"
 )
 
-// Failure contains an check error.
-type Failure struct {
-	Mod string
-	Err error
-}
-
-// Error implements the error interface.
-func (e *Failure) Error() string {
-	if e.Err == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s check failed: %s", e.Mod, e.Err)
-}
-
-// Unwrap returns the error's source of the failure.
-func (e *Failure) Unwrap() error {
-	return e.Err
-}
-
-// OutOfDate contains an update error.
-type OutOfDate struct {
-	Mod,
-	OldVersion,
-	NewVersion string
-}
-
-// Error implements the error interface.
-func (e *OutOfDate) Error() string {
-	return fmt.Sprintf("%s %s must be updated with %s", e.Mod, e.OldVersion, e.NewVersion)
-}
-
 // NewCharset returns a new charset's error.
 func NewCharset(charset string) error {
 	return errors.New("unsupported charset: " + charset)
@@ -72,8 +41,10 @@ const (
 	ErrMissing = errUp("missing data")
 	// ErrMod is returned when the go.mod file is invalid.
 	ErrMod = errUp("invalid go.mod")
-	// ErrSystem is returned when the VCS does not respond to the remote request.
-	ErrSystem = errUp("invalid VCS")
+	// ErrNotModified is returned when the file has not changed.
+	ErrNotModified = errUp("not modified")
 	// ErrRepository is returned when the repository is invalid.
 	ErrRepository = errUp("invalid repository")
+	// ErrSystem is returned when the VCS does not respond to the remote request.
+	ErrSystem = errUp("invalid VCS")
 )

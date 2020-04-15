@@ -47,6 +47,20 @@ func (mr *MockModMockRecorder) Module() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Module", reflect.TypeOf((*MockMod)(nil).Module))
 }
 
+// Name mocks base method
+func (m *MockMod) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockModMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockMod)(nil).Name))
+}
+
 // Dependencies mocks base method
 func (m *MockMod) Dependencies() []mod.Module {
 	m.ctrl.T.Helper()
@@ -89,16 +103,17 @@ func (mr *MockModMockRecorder) UpdateReplace(oldPath, newVersion interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReplace", reflect.TypeOf((*MockMod)(nil).UpdateReplace), oldPath, newVersion)
 }
 
-// UpdateAndSave mocks base method
-func (m *MockMod) UpdateAndSave() error {
+// Format mocks base method
+func (m *MockMod) Format() ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAndSave")
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Format")
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// UpdateAndSave indicates an expected call of UpdateAndSave
-func (mr *MockModMockRecorder) UpdateAndSave() *gomock.Call {
+// Format indicates an expected call of Format
+func (mr *MockModMockRecorder) Format() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAndSave", reflect.TypeOf((*MockMod)(nil).UpdateAndSave))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Format", reflect.TypeOf((*MockMod)(nil).Format))
 }

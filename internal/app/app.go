@@ -7,18 +7,14 @@ package app
 
 import (
 	"context"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/rvflash/goup/internal/errors"
-	"github.com/rvflash/goup/internal/mod"
+	"github.com/rvflash/goup/internal/log"
 	"github.com/rvflash/goup/pkg/goup"
+	"github.com/rvflash/goup/pkg/mod"
 )
-
-// LogPrefix is the prefix used when logging.
-const LogPrefix = "goup: "
 
 // Configurator defines the interface used to set settings.
 type Configurator func(a *App) error
@@ -35,14 +31,14 @@ func WithChecker(f goup.Checker) Configurator {
 	}
 }
 
-// WithErrOutput defines the receiver of update orders.
-// By default it is the standard error file descriptor.
-func WithErrOutput(w io.Writer) Configurator {
+// WithLogger defines the logger used to print events.
+// By default we use a NullLogger.
+func WithLogger(l log.Printer) Configurator {
 	return func(a *App) error {
-		if w == nil {
-			return errors.NewMissingData("err output")
+		if l == nil {
+			return errors.NewMissingData("output")
 		}
-		a.stderr = log.New(w, LogPrefix, 0)
+		a.logger = l
 		return nil
 	}
 }
@@ -59,26 +55,13 @@ func WithParser(f mod.Parser) Configurator {
 	}
 }
 
-// WithOutput defines the receiver of update advices.
-// By default it is the standard input file descriptor.
-func WithOutput(w io.Writer) Configurator {
-	return func(a *App) error {
-		if w == nil {
-			return errors.NewMissingData("output")
-		}
-		a.stdin = log.New(w, LogPrefix, 0)
-		return nil
-	}
-}
-
 // Open tries to create a new instance of App.
 func Open(version string, opts ...Configurator) (*App, error) {
 	a := &App{
 		buildVersion: version,
 	}
 	opts = append([]Configurator{
-		WithErrOutput(os.Stderr),
-		WithOutput(os.Stdout),
+		WithLogger(log.NullLogger),
 		WithParser(mod.Parse),
 		WithChecker(goup.Check),
 	}, opts...)
@@ -95,59 +78,51 @@ func Open(version string, opts ...Configurator) (*App, error) {
 type App struct {
 	goup.Config
 
-	check         goup.Checker
-	parse         mod.Parser
-	stdin, stderr *log.Logger
-	buildVersion  string
+	check        goup.Checker
+	parse        mod.Parser
+	logger       log.Printer
+	buildVersion string
 }
 
 // Check launches the analyses of given paths.
 func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
 	if !a.ready(ctx) {
-		a.errorf("%s\n", context.Canceled)
+		a.logger.Errorf(context.Canceled.Error())
 		return true
 	}
 	if a.PrintVersion {
-		a.errorf("version %s\n", a.buildVersion)
+		a.logger.Infof("version %s", a.buildVersion)
 		if len(paths) == 0 {
 			// Without explicit path: nothing else to do.
-			return
+			return false
 		}
 	}
 	for _, path := range checkPaths(paths) {
 		f, err := a.parse(path)
 		if err != nil {
-			a.errorf("%s\n", err.Error())
+			a.logger.Errorf(err.Error())
 			return true
 		}
-		for _, tip := range a.check(ctx, f, a.Config) {
-			if err = tip.Err(); err != nil {
-				a.errorf("%s: %s\n", f.Module(), err.Error())
+		for msg := range a.check(ctx, f, a.Config) {
+			switch msg.Level() {
+			case goup.DebugLevel:
+				a.logger.Debugf(msg.Format(), msg.Args()...)
+			case goup.InfoLevel:
+				a.logger.Infof(msg.Format(), msg.Args()...)
+			case goup.WarnLevel:
+				a.logger.Warnf(msg.Format(), msg.Args()...)
 				failure = true
-			} else {
-				a.printf("%s: %s\n", f.Module(), tip.String())
+			default:
+				a.logger.Errorf(msg.Format(), msg.Args()...)
+				failure = true
 			}
 		}
 	}
 	return failure
 }
 
-func (a *App) errorf(format string, v ...interface{}) {
-	if a.stderr == nil {
-		return
-	}
-	a.stderr.Printf(format, v...)
-}
-
-func (a *App) printf(format string, v ...interface{}) {
-	if a.stdin == nil || !a.Verbose {
-		return
-	}
-	a.stdin.Printf(format, v...)
-}
-
 func (a *App) ready(ctx context.Context) bool {
-	return ctx != nil && a.check != nil && a.parse != nil
+	return ctx != nil && a.check != nil && a.parse != nil && a.logger != nil
 }
 
 const (

@@ -7,14 +7,14 @@ package main
 import (
 	"context"
 	"flag"
-	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rvflash/goup/internal/app"
 	"github.com/rvflash/goup/internal/errors"
+	"github.com/rvflash/goup/internal/log"
 	"github.com/rvflash/goup/internal/signal"
 	"github.com/rvflash/goup/pkg/goup"
 )
@@ -36,6 +36,7 @@ func main() {
 			InsecurePatterns: patterns(os.Getenv(goInsecure), os.Getenv(goPrivate)),
 		}
 		s = "exclude indirect modules"
+		l = log.New(os.Stderr, isatty.IsTerminal(os.Stderr.Fd()))
 	)
 	flag.BoolVar(&c.ExcludeIndirect, "i", false, s)
 	s = "exit on first error occurred"
@@ -50,17 +51,17 @@ func main() {
 	flag.DurationVar(&c.Timeout, "t", timeout, s)
 	s = "force the update of the go.mod file as advised"
 	flag.BoolVar(&c.ForceUpdate, "f", false, s)
-	s = "verbose output"
-	flag.BoolVar(&c.Verbose, "v", false, s)
 	s = "print version"
 	flag.BoolVar(&c.PrintVersion, "V", false, s)
+	s = "verbose output"
+	flag.BoolVar(&c.Verbose, "v", false, s)
 	flag.Parse()
+	l.SetVerbose(c.Verbose)
 
-	err := run(signal.Background(), c, flag.Args(), os.Stdout, os.Stderr)
+	err := run(signal.Background(), c, flag.Args(), l)
 	if err != nil {
 		if err != errors.ErrMod {
-			log.SetPrefix(app.LogPrefix)
-			log.Println(err)
+			l.Errorf(err.Error())
 		}
 		os.Exit(errorCode)
 	}
@@ -76,11 +77,10 @@ func patterns(v ...string) string {
 	return strings.Join(a, comma)
 }
 
-func run(ctx context.Context, cnf goup.Config, args []string, stdout, stderr io.Writer) error {
+func run(ctx context.Context, cnf goup.Config, args []string, out log.Printer) error {
 	a, err := app.Open(
 		buildVersion,
-		app.WithErrOutput(stderr),
-		app.WithOutput(stdout),
+		app.WithLogger(out),
 	)
 	if err != nil {
 		return err

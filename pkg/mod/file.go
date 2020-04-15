@@ -29,22 +29,16 @@ type Parser func(path string) (*File, error)
 type Mod interface {
 	// Module returns the name of the module.
 	Module() string
+	// Name returns the relative path of the go.mod
+	Name() string
 	// Dependencies returns the dependencies of the module.
 	Dependencies() []Module
 	// UpdateRequire adds an update of this required module path to the given version.
 	UpdateRequire(path, version string) error
 	// UpdateRequire adds an update on the replacement of this module path to the given version.
 	UpdateReplace(oldPath, newVersion string) error
-	// UpdateAndSave applies any requested updates to the file.
-	UpdateAndSave() error
-}
-
-// File is a go.mod file.
-type File struct {
-	mods []Module
-
-	raw *modfile.File
-	mu  sync.RWMutex
+	// Format applies any requested updates to the file content.
+	Format() ([]byte, error)
 }
 
 // Parse tries to open a go.mod file.
@@ -66,6 +60,20 @@ func Parse(path string) (*File, error) {
 	}, nil
 }
 
+// File is a go.mod file.
+type File struct {
+	mods []Module
+
+	mu      sync.RWMutex
+	raw     *modfile.File
+	updated bool
+}
+
+// Dependencies implements the Mod interface.
+func (f *File) Dependencies() []Module {
+	return f.mods
+}
+
 // Module implements the Mod interface.
 func (f *File) Module() string {
 	f.mu.RLock()
@@ -77,9 +85,15 @@ func (f *File) Module() string {
 	return f.raw.Module.Mod.Path
 }
 
-// Dependencies implements the Mod interface.
-func (f *File) Dependencies() []Module {
-	return f.mods
+// Name implements the Mod interface.
+func (f *File) Name() string {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	if f.raw == nil || f.raw.Syntax == nil {
+		// Avoids panic.
+		return ""
+	}
+	return f.raw.Syntax.Name
 }
 
 // UpdateRequire implements the Mod interface.
@@ -89,6 +103,7 @@ func (f *File) UpdateRequire(path, version string) error {
 	if f.raw == nil {
 		return errors.ErrMod
 	}
+	f.updated = true
 	return f.raw.AddRequire(path, version)
 }
 
@@ -100,6 +115,7 @@ func (f *File) UpdateReplace(oldPath, newVersion string) error {
 	if err != nil {
 		return err
 	}
+	f.updated = true
 	return f.raw.AddReplace(oldPath, "", newPath, newVersion)
 }
 
@@ -115,18 +131,21 @@ func findNewPath(f *modfile.File, oldPath string) (string, error) {
 	return "", errors.ErrMissing
 }
 
-// UpdateAndSave implements the Mod interface.
-func (f *File) UpdateAndSave() error {
+// Format implements the Mod interface.
+func (f *File) Format() ([]byte, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	if f.raw == nil {
-		return errors.ErrMod
+		return nil, errors.ErrMod
 	}
 	buf, err := f.raw.Format()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return ioutil.WriteFile(f.raw.Syntax.Name, buf, 0644)
+	if !f.updated {
+		return buf, errors.ErrNotModified
+	}
+	return buf, nil
 }
 
 // dependencies returns the list of modules in this go.mod file.
