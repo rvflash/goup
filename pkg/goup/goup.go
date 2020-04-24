@@ -40,13 +40,13 @@ type Checker func(ctx context.Context, file mod.Mod, conf Config) chan Message
 
 // Check is the default checker of go.mod file.
 func Check(ctx context.Context, file mod.Mod, conf Config) chan Message {
-	chk := newEngine(conf)
+	chk := newGoUp(conf)
 	go chk.checkFile(ctx, file)
 	return chk.log
 }
 
-// newEngine returns a new instance of GoUp with the default dependencies checkers.
-func newEngine(conf Config, sets ...setter) *goUp {
+// newGoUp returns a new instance of GoUp with the default dependencies checkers.
+func newGoUp(conf Config, sets ...setter) *goUp {
 	var (
 		u = &goUp{
 			Config: conf,
@@ -131,7 +131,7 @@ func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 }
 
 // checkModule checks the version of the given module based on this configuration.
-func (e *goUp) checkModule(ctx context.Context, dep mod.Module) *entry {
+func (e *goUp) checkModule(ctx context.Context, dep mod.Module) *Entry {
 	if e.ExcludeIndirect && dep.Indirect() {
 		return newSkip(dep)
 	}

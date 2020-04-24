@@ -13,8 +13,9 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
+
 	errup "github.com/rvflash/goup/internal/errors"
-	"github.com/rvflash/goup/internal/mod"
+	"github.com/rvflash/goup/pkg/mod"
 )
 
 const (

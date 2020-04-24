@@ -23,106 +23,101 @@ const (
 	DebugLevel
 )
 
-// Message exposes entry properties.
+// Message exposes Entry properties.
 type Message interface {
-	Level() Level
-	Format() string
 	Args() []interface{}
+	Format() string
+	Level() Level
 	OutDated() (newVersion string, ok bool)
 }
 
-func newEntry(level Level, format string, a ...interface{}) *entry {
-	return &entry{
+// NewEntry returns a new Entry.
+func NewEntry(level Level, format string, a ...interface{}) *Entry {
+	return &Entry{
 		Kind:    level,
 		Message: format,
 		Data:    a,
 	}
 }
 
-type entry struct {
+// Entry represents a message.
+type Entry struct {
 	Kind    Level
 	Message string
 	Data    []interface{}
 }
 
 // Args implements the Message interface.
-func (e *entry) Args() []interface{} {
+func (e *Entry) Args() []interface{} {
 	if e == nil {
 		return nil
 	}
 	return e.Data
 }
 
-// Level implements the Message interface.
-func (e *entry) Level() Level {
-	if e == nil {
-		return ErrorLevel
-	}
-	return e.Kind
-}
-
 // Format implements the Message interface.
-func (e *entry) Format() string {
+func (e *Entry) Format() string {
 	if e == nil {
 		return ""
 	}
 	return e.Message
 }
 
-const newVersionPos = 2
+// Level implements the Message interface.
+func (e *Entry) Level() Level {
+	if e == nil {
+		return ErrorLevel
+	}
+	return e.Kind
+}
 
 // OutDated implements the Message interface.
-func (e *entry) OutDated() (newVersion string, ok bool) {
+func (e *Entry) OutDated() (newVersion string, ok bool) {
+	const newVersionPos = 2
 	if e == nil || e.Level() != WarnLevel || len(e.Args()) != newVersionPos+1 {
 		return
 	}
 	return e.Args()[newVersionPos].(string), true
 }
 
-func newCheck(dep mod.Module) *entry {
+func newCheck(dep mod.Module) *Entry {
 	if dep == nil {
-		// Avoids panic.
 		return nil
 	}
-	return newEntry(DebugLevel, "%s: %s is up to date", dep.Path(), dep.Version().String())
+	return NewEntry(DebugLevel, "%s: %s is up to date", dep.Path(), dep.Version().String())
 }
 
-func newError(err error, file mod.Mod) *entry {
+func newError(err error, file mod.Mod) *Entry {
 	if err == nil || file == nil {
-		// Avoids panic.
 		return nil
 	}
-	return newEntry(ErrorLevel, "%s: "+err.Error(), file.Module())
+	return NewEntry(ErrorLevel, "%s: "+err.Error(), file.Module())
 }
 
-func newFailure(err error, dep mod.Module) *entry {
-	if dep == nil || err == nil {
-		// Avoids panic.
+func newFailure(err error, dep mod.Module) *Entry {
+	if err == nil || dep == nil {
 		return nil
 	}
-	return newEntry(ErrorLevel, "%s: check failed: %s", dep.Path(), err)
+	return NewEntry(ErrorLevel, "%s: check failed: %s", dep.Path(), err)
 }
 
-func newSkip(dep mod.Module) *entry {
+func newSkip(dep mod.Module) *Entry {
 	if dep == nil {
-		// Avoids panic.
 		return nil
 	}
-	return newEntry(DebugLevel, "%s: %s update skipped: indirect", dep.Path(), dep.Version().String())
+	return NewEntry(DebugLevel, "%s: %s update skipped: indirect", dep.Path(), dep.Version().String())
 }
 
-func newUpdate(dep mod.Module, newVersion string) *entry {
+func newUpdate(dep mod.Module, newVersion string) *Entry {
 	if dep == nil {
-		// Avoids panic.
 		return nil
 	}
-	return newEntry(InfoLevel, "%s: %s will be updated to %s", dep.Path(), dep.Version().String(), newVersion)
+	return NewEntry(InfoLevel, "%s: %s will be updated to %s", dep.Path(), dep.Version().String(), newVersion)
 }
 
-func newOutOfDate(dep mod.Module, newVersion string) *entry {
+func newOutOfDate(dep mod.Module, newVersion string) *Entry {
 	if dep == nil {
-		// Avoids panic.
 		return nil
 	}
-	return newEntry(WarnLevel, "%s: %s must be updated to %s", dep.Path(), dep.Version().String(), newVersion)
+	return NewEntry(WarnLevel, "%s: %s must be updated to %s", dep.Path(), dep.Version().String(), newVersion)
 }

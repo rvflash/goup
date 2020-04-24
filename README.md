@@ -1,8 +1,8 @@
 # Go Up
 
 [![GoDoc](https://godoc.org/github.com/rvflash/goup?status.svg)](https://godoc.org/github.com/rvflash/goup)
-[![Build Status](https://img.shields.io/travis/rvflash/goup.svg)](https://travis-ci.org/rvflash/goup)
-[![Code Coverage](https://img.shields.io/codecov/c/github/rvflash/goup.svg)](http://codecov.io/github/rvflash/goup?branch=master)
+[![Build Status](https://api.travis-ci.org/rvflash/goup.svg?branch=master)](https://travis-ci.org/rvflash/goup?branch=master)
+[![Code Coverage](https://codecov.io/gh/rvflash/goup/branch/master/graph/badge.svg)](https://codecov.io/gh/rvflash/goup)"
 [![Go Report Card](https://goreportcard.com/badge/github.com/rvflash/goup?)](https://goreportcard.com/report/github.com/rvflash/goup)
 
 
@@ -26,7 +26,7 @@ not require an HTTPS connection. Since version `v0.3.0`, `GOPRIVATE` has the sam
 
 ## Demo
 
-```shell script
+```shell
 $ goup -v -m ./...
 $ goup: github.com/rvflash/goup: golang.org/x/mod v0.2.1-0.20200121190230-accd165b1659 is up to date
 $ goup: github.com/rvflash/goup: github.com/matryer/is v1.1.0 must be updated with v1.2.0
@@ -42,19 +42,19 @@ on the [releases page](https://github.com/rvflash/goup/releases).
 
 ### Go
 
-```shell script
+```shell
 GO111MODULE=on go get github.com/rvflash/goup@v0.4.0
 ```
 
 ### Docker
 
-```shell script
+```shell
 docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.0 goup -V
 ```
 
 ## Usage
 
-```shell script
+```shell
 goup [flags] [modfiles]
 ```
 
@@ -77,6 +77,6 @@ no prerelease.
 
 Using example with an auto-signed local git repository:
 
-```shell script
+```shell
 GOINSECURE="gitlab.example.lan/*/*" goup -v .
 ```

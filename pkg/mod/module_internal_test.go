@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
+
 	"github.com/rvflash/goup/internal/semver"
 )
 

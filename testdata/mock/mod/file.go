@@ -6,7 +6,7 @@ package mock_mod
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	mod "github.com/rvflash/goup/internal/mod"
+	mod "github.com/rvflash/goup/pkg/mod"
 	reflect "reflect"
 )
 

@@ -2,13 +2,14 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package log exposes the interface to implement as logger and provides some implementations.
 package log
 
 import (
 	"io"
 	"log"
 
-	"github.com/logrusorgru/aurora"
+	"github.com/fatih/color"
 )
 
 // Prefix is the prefix used when logging.
@@ -26,22 +27,32 @@ type Printer interface {
 	Warnf(format string, args ...interface{})
 }
 
-// NullLogger is the default logger only used to mock the logger interface and do nothing.
-var NullLogger = &Logger{}
+// DevNull is the default logger only used to mock the logger interface and do nothing else.
+func DevNull() *Logger { return &Logger{} }
 
 // New returns a new instance of a Logger.
 func New(out io.Writer, tty bool) *Logger {
+	if out == nil {
+		// Avoids panics.
+		return DevNull()
+	}
 	return &Logger{
 		stderr: log.New(out, Prefix, 0),
-		colors: aurora.NewAurora(tty),
+		cyan:   sPrintFunc(tty, color.FgCyan),
+		green:  sPrintFunc(tty, color.FgGreen),
+		red:    sPrintFunc(tty, color.FgRed),
+		yellow: sPrintFunc(tty, color.FgHiYellow),
 	}
 }
 
-// Logger
+// Logger is the logger.
 type Logger struct {
 	stderr  *log.Logger
-	colors  aurora.Aurora
 	verbose bool
+	cyan,
+	green,
+	red,
+	yellow func(a ...interface{}) string
 }
 
 // SetVerbose enabled verbose mode.
@@ -51,60 +62,52 @@ func (l *Logger) SetVerbose(ok bool) {
 
 // Debugf implements the Printer interface.
 func (l *Logger) Debugf(format string, args ...interface{}) {
-	if l == nil || !l.verbose {
+	if !l.verbose {
 		// Avoid panics
 		return
 	}
-	l.printf(format, l.colors.Cyan, args...)
+	l.printf(format, l.cyan, args...)
 }
 
 // Errorf implements the Printer interface.
 func (l *Logger) Errorf(format string, args ...interface{}) {
-	if l == nil {
-		// Avoid panics
-		return
-	}
-	l.printf(format, l.colors.Red, args...)
+	l.printf(format, l.red, args...)
 }
 
 // Infof implements the Printer interface.
 func (l *Logger) Infof(format string, args ...interface{}) {
-	if l == nil {
-		// Avoid panics
-		return
-	}
-	l.printf(format, l.colors.Green, args...)
+	l.printf(format, l.green, args...)
 }
 
 // Warnf implements the Printer interface.
 func (l *Logger) Warnf(format string, args ...interface{}) {
-	if l == nil {
-		// Avoid panics
-		return
-	}
-	l.printf(format, l.colors.Yellow, args...)
+	l.printf(format, l.yellow, args...)
 }
 
-func (l *Logger) printf(format string, color func(arg interface{}) aurora.Value, args ...interface{}) {
-	if color == nil {
-		// No color
-		l.stderr.Printf(format, args...)
+func (l *Logger) printf(format string, color func(a ...interface{}) string, args ...interface{}) {
+	if l.stderr == nil || color == nil {
+		// /dev/null
 		return
 	}
 	if len(args) == 0 {
 		// No argument, the entire message is colored
-		l.stderr.Printf(color(format).String())
+		l.stderr.Printf(color(format))
 		return
 	}
 	l.stderr.Printf(format, colors(color, args)...)
 }
 
-func colors(f func(arg interface{}) aurora.Value, args []interface{}) []interface{} {
-	if f == nil || len(args) == 0 {
-		return nil
-	}
+func colors(f func(a ...interface{}) string, args []interface{}) []interface{} {
 	for k, v := range args {
 		args[k] = f(v)
 	}
 	return args
+}
+
+func sPrintFunc(tty bool, values ...color.Attribute) func(a ...interface{}) string {
+	c := color.New(values...)
+	if !tty {
+		c.DisableColor()
+	}
+	return c.SprintFunc()
 }
