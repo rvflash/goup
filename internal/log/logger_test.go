@@ -27,18 +27,18 @@ const (
 func TestNew(t *testing.T) {
 	// /dev/null
 	l := log.New(nil, false)
-	call(t, l, fDebugName, d0)
-	call(t, l, fErrorName, d0)
-	call(t, l, fInfoName, d0)
-	call(t, l, fWarnName, d0)
+	callf(t, l, fDebugName, d0)
+	callf(t, l, fErrorName, d0)
+	callf(t, l, fInfoName, d0)
+	callf(t, l, fWarnName, d0)
 }
 
 func TestDevNull(t *testing.T) {
 	l := log.DevNull()
-	call(t, l, fDebugName, d0)
-	call(t, l, fErrorName, d0)
-	call(t, l, fInfoName, d0)
-	call(t, l, fWarnName, d0)
+	callf(t, l, fDebugName, d0)
+	callf(t, l, fErrorName, d0)
+	callf(t, l, fInfoName, d0)
+	callf(t, l, fWarnName, d0)
 }
 func TestLogger_Debugf(t *testing.T) {
 	const (
@@ -85,7 +85,7 @@ func TestLogger_Debugf(t *testing.T) {
 			}()
 			l := log.New(out, false)
 			l.SetVerbose(tt.verbose)
-			call(t, l, tt.method, tt.in, tt.args...)
+			callf(t, l, tt.method, tt.in, tt.args...)
 			s, _ := readFile(t, out)
 			are.Equal(tt.out, s) // mismatch result
 		})
@@ -120,7 +120,7 @@ func TestLogger_SetVerbose(t *testing.T) {
 	are.Equal(size, prefixedD0Len) // expected no new content
 }
 
-func call(t *testing.T, w log.Printer, method string, format string, args ...interface{}) {
+func callf(t *testing.T, w log.Printer, method string, format string, args ...interface{}) {
 	switch method {
 	case fDebugName:
 		w.Debugf(format, args...)

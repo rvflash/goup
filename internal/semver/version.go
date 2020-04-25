@@ -32,7 +32,7 @@ func (t Tags) Not(w fmt.Stringer) Tags {
 	return append(t[:i], t[i+1:]...)
 }
 
-// Len implements the sort interface.New
+// Len implements the sort interface.
 func (t Tags) Len() int {
 	return len(t)
 }

@@ -32,7 +32,7 @@ func WithChecker(f goup.Checker) Configurator {
 }
 
 // WithLogger defines the logger used to print events.
-// By default we use a NullLogger.
+// By default we use a DevNull.
 func WithLogger(l log.Printer) Configurator {
 	return func(a *App) error {
 		if l == nil {
@@ -61,7 +61,7 @@ func Open(version string, opts ...Configurator) (*App, error) {
 		buildVersion: version,
 	}
 	opts = append([]Configurator{
-		WithLogger(log.NullLogger),
+		WithLogger(log.DevNull()),
 		WithParser(mod.Parse),
 		WithChecker(goup.Check),
 	}, opts...)
@@ -87,7 +87,10 @@ type App struct {
 // Check launches the analyses of given paths.
 func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
 	if !a.ready(ctx) {
-		a.logger.Errorf(context.Canceled.Error())
+		if a.logger != nil {
+			// Avoids panic.
+			a.logger.Errorf(context.Canceled.Error())
+		}
 		return true
 	}
 	if a.PrintVersion {

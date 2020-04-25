@@ -46,7 +46,7 @@ func TestNewCheck(t *testing.T) {
 	defer ctrl.Finish()
 
 	are.Equal(newCheck(dep), nil) // mismatch default
-	dep = newDep(ctrl, v0)
+	dep = newDep(ctrl)
 	msg := newCheck(dep)
 	are.Equal(msg.Level(), DebugLevel)                        // mismatch level
 	are.True(strings.Contains(msg.Format(), "is up to date")) // mismatch message
@@ -109,7 +109,7 @@ func TestNewFailure(t *testing.T) {
 			"Without error": {dep: &mockMod.MockModule{}},
 			"Without dep":   {err: errors.ErrExpectedTag},
 			"Complete": {
-				dep: newDep(ctrl, v0),
+				dep: newDep(ctrl),
 				err: errors.ErrExpectedTag,
 				msg: "check failed",
 				len: 2,
@@ -140,7 +140,7 @@ func TestNewSkip(t *testing.T) {
 	defer ctrl.Finish()
 
 	are.Equal(newSkip(dep), nil) // mismatch default
-	dep = newDep(ctrl, v0)
+	dep = newDep(ctrl)
 	msg := newSkip(dep)
 	are.Equal(msg.Level(), DebugLevel)                         // mismatch level
 	are.True(strings.Contains(msg.Format(), "update skipped")) // mismatch message
@@ -158,7 +158,7 @@ func TestNewUpdate(t *testing.T) {
 	defer ctrl.Finish()
 
 	are.Equal(newUpdate(dep, v1), nil) // mismatch default
-	dep = newDep(ctrl, v0)
+	dep = newDep(ctrl)
 	msg := newUpdate(dep, v1)
 	are.Equal(msg.Level(), InfoLevel)                           // mismatch level
 	are.True(strings.Contains(msg.Format(), "will be updated")) // mismatch message
@@ -176,7 +176,7 @@ func TestNewOutOfDate(t *testing.T) {
 
 	are.Equal(newOutOfDate(nil, v1), nil) // mismatch default
 	var (
-		dep = newDep(ctrl, v0)
+		dep = newDep(ctrl)
 		msg = newOutOfDate(dep, v1)
 	)
 	are.Equal(msg.Level(), WarnLevel)                           // mismatch level
@@ -193,9 +193,9 @@ func newMod(ctrl *gomock.Controller) *mockMod.MockMod {
 	return m
 }
 
-func newDep(ctrl *gomock.Controller, v string) *mockMod.MockModule {
+func newDep(ctrl *gomock.Controller) *mockMod.MockModule {
 	d := mockMod.NewMockModule(ctrl)
 	d.EXPECT().Path().Return(repoName).Times(oneTime)
-	d.EXPECT().Version().Return(semver.New(v)).AnyTimes()
+	d.EXPECT().Version().Return(semver.New(v0)).AnyTimes()
 	return d
 }

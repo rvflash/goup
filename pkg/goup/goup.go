@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package goup provides methods to check updates on go.mod file and modules.
 package goup
 
 import (
@@ -183,11 +184,12 @@ func (e *goUp) ready(ctx context.Context) bool {
 
 func latest(versions semver.Tags, dep mod.Module, major, majorMinor bool) (semver.Tag, bool) {
 	var v semver.Tag
-	if major {
+	switch {
+	case major:
 		v = semver.Latest(versions)
-	} else if majorMinor {
+	case majorMinor:
 		v = semver.LatestMinor(dep.Version().Major(), versions)
-	} else {
+	default:
 		v = semver.LatestPatch(dep.Version().MajorMinor(), versions)
 	}
 	return v, v != nil
