@@ -61,16 +61,16 @@ goup [flags] [modfiles]
 The `goup` command is used to check updates of any dependencies in the go.mod file.
 It supports the following flags:
 
-* `-M`: ensures to have the latest major version. By default: only the path is challenged.
-* `-m`: ensures to have the latest couple major with minor version. By default: only the path is challenged.
+* `-M`: ensures to have the latest major version. By default, only the path is challenged.
+* `-m`: ensures to have the latest couple major with minor version. By default, only the path is challenged.
 * `-V`: prints the version of the tool.
 * `-f`: force the update of the go.mod file as advised
-* `-i`: allows to exclude indirect modules.
+* `-i`: allows excluding indirect modules.
 * `-r`: it's a comma-separated list of glob patterns to match the repository paths where to force tag usage.
 For example with `github.com/group/*` as value, any modules in this repository group must have a release tag,
 no prerelease. 
 * `-s`: forces the process to exit on first error occurred.
-* `-t`: defines the maximum time duration to perform the check. By default: 10s. 
+* `-t`: defines the maximum time duration to perform the check. By default, 10s. 
 * `-v`: verbose output
 
 `[modfiles]` can be one or more direct path to `go.mod` files, `.` or `./...` to get all those in the tree.
