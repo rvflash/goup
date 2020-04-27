@@ -58,7 +58,7 @@ docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.0 goup -V
 goup [flags] [modfiles]
 ```
 
-The `goup` command is used to check updates of any dependencies in the go.mod file.
+The `goup` command checks updates of any dependencies in the go.mod file.
 It supports the following flags:
 
 * `-M`: ensures to have the latest major version. By default, only the path is challenged.

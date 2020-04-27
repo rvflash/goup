@@ -21,13 +21,14 @@ import (
 )
 
 const (
-	version   = "v0.1.0"
-	notFound  = "/not-found"
-	fileBuggy = "ok+err"
-	fileErr   = "err"
-	fileOK    = "ok"
-	noop      = "no operation to do"
-	oops      = "oops"
+	version      = "v0.1.0"
+	notFound     = "/not-found"
+	fileBuggy    = "ok+err"
+	fileOutdated = "now ok"
+	fileErr      = "err"
+	fileOK       = "ok"
+	noop         = "no operation to do"
+	oops         = "oops"
 )
 
 func TestOpen(t *testing.T) {
@@ -40,7 +41,6 @@ func TestOpen(t *testing.T) {
 			out    bool
 			config goup.Config
 			stderr string
-			stdout string
 		}{
 			"default": {out: true, stderr: log.Prefix + "context canceled\n"},
 			"empty":   {ctx: context.Background()},
@@ -76,20 +76,24 @@ func TestOpen(t *testing.T) {
 				out:    true,
 				config: goup.Config{PrintVersion: true, OnlyReleases: fileBuggy, Verbose: true},
 				stderr: wv + log.Prefix + oops + "\n",
-				stdout: log.Prefix + noop + "\n",
 			},
 			"verbose ok": {
 				ctx:    context.Background(),
 				in:     []string{fileOK},
 				config: goup.Config{PrintVersion: true, OnlyReleases: "ok", Verbose: true},
 				stderr: wv,
-				stdout: log.Prefix + noop + "\n",
 			},
 			"ok": {
 				ctx:    context.Background(),
 				in:     []string{fileOK},
 				config: goup.Config{PrintVersion: true, OnlyReleases: "ok"},
 				stderr: wv,
+			},
+			"force outdated": {
+				ctx:    context.Background(),
+				in:     []string{fileOK},
+				config: goup.Config{PrintVersion: true, OnlyReleases: fileOutdated, Verbose: true},
+				stderr: wv + log.Prefix + noop + "\n",
 			},
 			"recursive": {
 				ctx:    context.Background(),
@@ -176,6 +180,8 @@ func (p *checker) Check(_ context.Context, _ mod.Mod, conf goup.Config) chan gou
 	go func() {
 		defer close(ch)
 		switch conf.OnlyReleases {
+		case fileOutdated:
+			ch <- goup.NewEntry(goup.InfoLevel, "%s", noop)
 		case fileBuggy:
 			ch <- goup.NewEntry(goup.DebugLevel, "%s", noop)
 			ch <- goup.NewEntry(goup.WarnLevel, "%s", oops)
