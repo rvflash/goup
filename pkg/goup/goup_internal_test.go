@@ -5,6 +5,10 @@
 package goup
 
 import (
+	"errors"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -15,6 +19,36 @@ import (
 	"github.com/rvflash/goup/pkg/mod"
 	mockMod "github.com/rvflash/goup/testdata/mock/mod"
 )
+
+func TestUpdateFile(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	are := is.New(t)
+	dir, err := ioutil.TempDir("", "goup")
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+	are.NoErr(err)
+
+	dt := map[string]struct {
+		file    mod.Mod
+		err     error
+		updated bool
+	}{
+		"Not modified": {file: newTmpMod(ctrl, filepath.Join(dir, "t0"), errup.ErrNotModified)},
+		"Failed":       {file: newTmpMod(ctrl, filepath.Join(dir, "t1"), errup.ErrFetch), err: errup.ErrFetch},
+		"Default":      {file: newTmpMod(ctrl, filepath.Join(dir, "t2"), nil), updated: true},
+	}
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			err := updateFile(tt.file)
+			are.True(errors.Is(err, tt.err))                  // mismatch error
+			are.Equal(tt.updated, fileExists(tt.file.Name())) // mismatch file "created"
+		})
+	}
+}
 
 func TestLatest(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -109,4 +143,22 @@ func newVer(ctrl *gomock.Controller, v string) *mockMod.MockModule {
 	d := mockMod.NewMockModule(ctrl)
 	d.EXPECT().Version().Return(semver.New(v)).AnyTimes()
 	return d
+}
+
+func newTmpMod(ctrl *gomock.Controller, name string, err error) *mockMod.MockMod {
+	m := mockMod.NewMockMod(ctrl)
+	if err != nil {
+		m.EXPECT().Format().Return(nil, err).Times(oneTime)
+		m.EXPECT().Name().Return(name).AnyTimes()
+	} else {
+		m.EXPECT().Format().Return([]byte("foo bar"), nil).Times(oneTime)
+		m.EXPECT().Name().Return(name).MinTimes(oneTime)
+	}
+
+	return m
+}
+
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
 }
