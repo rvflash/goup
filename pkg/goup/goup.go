@@ -128,7 +128,10 @@ func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 		e.log <- newError(errup.ErrNotModified, file)
 		return
 	}
-	e.updateFile(file)
+	err := updateFile(file)
+	if err != nil {
+		e.log <- newError(err, file)
+	}
 }
 
 // checkModule checks the version of the given module based on this configuration.
@@ -164,18 +167,15 @@ func (e *goUp) checkModule(ctx context.Context, dep mod.Module) *Entry {
 	return newFailure(errup.ErrSystem, dep)
 }
 
-func (e *goUp) updateFile(file mod.Mod) {
+func updateFile(file mod.Mod) error {
 	buf, err := file.Format()
 	if err != nil {
 		if !errors.Is(err, errup.ErrNotModified) {
-			e.log <- newError(err, file)
+			return err
 		}
-		return
+		return nil
 	}
-	err = ioutil.WriteFile(file.Name(), buf, perm)
-	if err != nil {
-		e.log <- newError(err, file)
-	}
+	return ioutil.WriteFile(file.Name(), buf, perm)
 }
 
 func (e *goUp) ready(ctx context.Context) bool {
