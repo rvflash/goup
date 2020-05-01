@@ -5,20 +5,77 @@
 package goup
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
+	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/pkg/mod"
 	mockMod "github.com/rvflash/goup/testdata/mock/mod"
+	mockVCS "github.com/rvflash/goup/testdata/mock/vcs"
 )
+
+func TestGoUp_CheckModule(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	var (
+		sy1 = newSystem(ctrl, semver.Tags{semver.New(v0)}, nil)
+		are = is.New(t)
+		dt  = map[string]struct {
+			system vcs.System
+			ctx    context.Context
+			module mod.Module
+			cnf    Config
+			level  Level
+			format string
+		}{
+			"skip indirect": {
+				system: sy1,
+				ctx:    ctx,
+				module: newModule(ctrl, true),
+				cnf:    Config{ExcludeIndirect: true},
+				level:  DebugLevel,
+				format: "update skipped",
+			},
+			"not matches vcs": {
+				system: newNoSystem(ctrl),
+				ctx:    ctx,
+				module: newModule(ctrl, true),
+				level:  ErrorLevel,
+				format: "check failed",
+			},
+			"ok": {
+				system: sy1,
+				ctx:    ctx,
+				module: newModule(ctrl, false),
+				cnf:    Config{ExcludeIndirect: true},
+				level:  DebugLevel,
+				format: "up to date",
+			},
+		}
+	)
+	for name, tt := range dt {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			u := newGoUp(tt.cnf, setGoGet(tt.system), setGit(tt.system))
+			e := u.checkModule(tt.ctx, tt.module)
+			are.Equal(tt.level, e.Level())                    // mismatch level
+			are.True(strings.Contains(e.Format(), tt.format)) // mismatch format
+		})
+	}
+}
 
 func TestUpdateFile(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -130,6 +187,27 @@ func TestOnlyTag(t *testing.T) {
 			are.Equal(err, tt.err) // mismatch error
 		})
 	}
+}
+func newModule(ctrl *gomock.Controller, indirect bool) *mockMod.MockModule {
+	m := mockMod.NewMockModule(ctrl)
+	m.EXPECT().Path().Return(repoName).AnyTimes()
+	m.EXPECT().Version().Return(semver.New(v0)).AnyTimes()
+	m.EXPECT().Indirect().Return(indirect).AnyTimes()
+	m.EXPECT().ExcludeVersion().Return(nil, false).AnyTimes()
+	return m
+}
+
+func newNoSystem(ctrl *gomock.Controller) *mockVCS.MockSystem {
+	m := mockVCS.NewMockSystem(ctrl)
+	m.EXPECT().CanFetch(gomock.Any()).Return(false).AnyTimes()
+	return m
+}
+
+func newSystem(ctrl *gomock.Controller, tags semver.Tags, err error) *mockVCS.MockSystem {
+	m := mockVCS.NewMockSystem(ctrl)
+	m.EXPECT().CanFetch(gomock.Any()).Return(true).AnyTimes()
+	m.EXPECT().FetchPath(gomock.Any(), gomock.Any()).Return(tags, err).AnyTimes()
+	return m
 }
 
 func newTag(ctrl *gomock.Controller, v string) *mockMod.MockModule {
