@@ -2,20 +2,24 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package goup provides methods to check updates on go.mod file and modules.
 package goup
 
 import (
 	"context"
+	"errors"
+	"io/ioutil"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/rvflash/goup/internal/errors"
-	"github.com/rvflash/goup/internal/mod"
+	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/path"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
 	"github.com/rvflash/goup/internal/vcs/goget"
+	"github.com/rvflash/goup/pkg/mod"
 )
 
 // Config is used as the settings of the GoUp application.
@@ -32,41 +36,29 @@ type Config struct {
 	Timeout          time.Duration
 }
 
+// Checker must be implemented to checkFile updates on go.mod file or module.
+type Checker func(ctx context.Context, file mod.Mod, conf Config) chan Message
+
 // Check is the default checker of go.mod file.
-func Check(ctx context.Context, file mod.Mod, conf Config) []Tip {
-	return New(conf).CheckFile(ctx, file, conf)
+func Check(ctx context.Context, file mod.Mod, conf Config) chan Message {
+	chk := newGoUp(conf)
+	go chk.checkFile(ctx, file)
+	return chk.log
 }
 
-// Checker must be implemented to check updates on go mod file or module.
-type Checker func(ctx context.Context, file mod.Mod, conf Config) []Tip
-
-// Setter defines the interface used to set settings.
-type Setter func(u *GoUp)
-
-// SetGit set the VCS git.
-func SetGit(git vcs.System) Setter {
-	return func(u *GoUp) {
-		u.git = git
-	}
-}
-
-// SetGoGet sets the VCS go-get.
-func SetGoGet(goGet vcs.System) Setter {
-	return func(u *GoUp) {
-		u.goGet = goGet
-	}
-}
-
-// New returns a new instance of GoUp with the default dependencies checkers.
-func New(conf Config, sets ...Setter) *GoUp {
+// newGoUp returns a new instance of GoUp with the default dependencies checkers.
+func newGoUp(conf Config, sets ...setter) *goUp {
 	var (
-		u          = new(GoUp)
+		u = &goUp{
+			Config: conf,
+			log:    make(chan Message),
+		}
 		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
 		gitVCS     = git.New(httpClient)
 	)
-	sets = append([]Setter{
-		SetGit(gitVCS),
-		SetGoGet(goget.New(httpClient, gitVCS)),
+	sets = append([]setter{
+		setGit(gitVCS),
+		setGoGet(goget.New(httpClient, gitVCS)),
 	}, sets...)
 	for _, set := range sets {
 		set(u)
@@ -74,83 +66,128 @@ func New(conf Config, sets ...Setter) *GoUp {
 	return u
 }
 
-// GoUp allows to check a go.mod file with each of these dependencies.
-type GoUp struct {
+type goUp struct {
+	Config
 	git, goGet vcs.System
+	log        chan Message
 }
 
-const delta = 1
+const (
+	delta = 1
+	perm  = 0644
+)
 
-// CheckFile verifies the given go.mod file based on this configuration.
-// It's implements the Checker interface.
-func (u *GoUp) CheckFile(parent context.Context, file mod.Mod, conf Config) []Tip {
-	up := &updates{Mod: file}
-	if !u.ready(parent) || file == nil {
-		up.must(errors.ErrMod)
-		return up.tips()
+// checkFile verifies the given go.mod file based on this configuration.
+// Regarding the configuration, it applies any update advices to the go.mod file.
+// If one or more checks failed, the update is cancelled.
+func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
+	defer close(e.log)
+	if !e.ready(parent) || file == nil {
+		e.log <- newError(errup.ErrMod, file)
+		return
 	}
-	ctx, cancel := context.WithTimeout(parent, conf.Timeout)
+	ctx, cancel := context.WithTimeout(parent, e.Timeout)
 	defer cancel()
-	var w8 sync.WaitGroup
+	var (
+		w8 sync.WaitGroup
+		ko uint64
+	)
 	for _, d := range file.Dependencies() {
 		w8.Add(delta)
 		go func(d mod.Module) {
 			defer w8.Done()
-			adv, err := u.CheckModule(ctx, d, conf)
-			if err != nil {
-				up.must(err)
+			log := e.checkModule(ctx, d)
+			v, ok := log.OutDated()
+			if !ok || !e.ForceUpdate {
+				if log.Level() < InfoLevel {
+					atomic.AddUint64(&ko, delta)
+				}
+				e.log <- log
 				return
 			}
-			up.could(adv)
+			var err error
+			if d.Replacement() {
+				err = file.UpdateReplace(d.Path(), v)
+			} else {
+				err = file.UpdateRequire(d.Path(), v)
+			}
+			if err != nil {
+				atomic.AddUint64(&ko, delta)
+				e.log <- newFailure(err, d)
+				return
+			}
+			e.log <- newUpdate(d, v)
 		}(d)
 	}
 	w8.Wait()
 
-	return up.tips()
+	if !e.ForceUpdate {
+		return
+	}
+	if ko > 0 {
+		e.log <- newError(errup.ErrNotModified, file)
+		return
+	}
+	err := updateFile(file)
+	if err != nil {
+		e.log <- newError(err, file)
+	}
 }
 
-// CheckModule checks the version of the given module based on this configuration.
-func (u *GoUp) CheckModule(ctx context.Context, dep mod.Module, conf Config) (string, error) {
-	if !u.ready(ctx) || dep == nil {
-		return "", errors.ErrRepository
+// checkModule checks the version of the given module based on this configuration.
+func (e *goUp) checkModule(ctx context.Context, dep mod.Module) *Entry {
+	if e.ExcludeIndirect && dep.Indirect() {
+		return newSkip(dep)
 	}
-	if conf.ExcludeIndirect && dep.Indirect() {
-		return skipped(dep), nil
-	}
-	for _, system := range []vcs.System{u.goGet, u.git} {
+	for _, system := range []vcs.System{e.goGet, e.git} {
 		if !system.CanFetch(dep.Path()) {
 			continue
 		}
 		vs, err := system.FetchPath(ctx, dep.Path())
 		if err != nil {
-			return "", newError(dep, err)
+			return newFailure(err, dep)
 		}
-		v, ok := latest(vs, dep, conf)
+		x, ok := dep.ExcludeVersion()
+		if ok {
+			vs = vs.Not(x)
+		}
+		v, ok := latest(vs, dep, e.Config.Major, e.Config.MajorMinor)
 		if !ok {
-			return checked(dep), nil
+			return newCheck(dep)
 		}
 		if semver.Compare(dep.Version(), v) < 0 {
-			return "", newOrder(dep, v.String())
+			return newOutOfDate(dep, v.String())
 		}
-		err = onlyTag(dep, conf.OnlyReleases)
+		err = onlyTag(dep, e.OnlyReleases)
 		if err != nil {
-			return "", newError(dep, err)
+			return newFailure(err, dep)
 		}
-		return checked(dep), nil
+		return newCheck(dep)
 	}
-	return "", newError(dep, errors.ErrSystem)
+	return newFailure(errup.ErrSystem, dep)
 }
 
-func (u *GoUp) ready(ctx context.Context) bool {
-	return ctx != nil && u.goGet != nil && u.git != nil
+func updateFile(file mod.Mod) error {
+	buf, err := file.Format()
+	if err != nil {
+		if !errors.Is(err, errup.ErrNotModified) {
+			return err
+		}
+		return nil
+	}
+	return ioutil.WriteFile(file.Name(), buf, perm)
 }
 
-func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool) {
+func (e *goUp) ready(ctx context.Context) bool {
+	return ctx != nil && e.log != nil && e.goGet != nil && e.git != nil
+}
+
+func latest(versions semver.Tags, dep mod.Module, major, majorMinor bool) (semver.Tag, bool) {
 	var v semver.Tag
 	switch {
-	case conf.Major:
+	case major:
 		v = semver.Latest(versions)
-	case conf.MajorMinor:
+	case majorMinor:
 		v = semver.LatestMinor(dep.Version().Major(), versions)
 	default:
 		v = semver.LatestPatch(dep.Version().MajorMinor(), versions)
@@ -160,7 +197,24 @@ func latest(versions semver.Tags, dep mod.Module, conf Config) (semver.Tag, bool
 
 func onlyTag(d mod.Module, globs string) error {
 	if path.Match(globs, d.Path()) && !d.Version().IsTag() {
-		return errors.ErrExpectedTag
+		return errup.ErrExpectedTag
 	}
 	return nil
+}
+
+// setter defines the interface used to set settings.
+type setter func(u *goUp)
+
+// setGit set the VCS git.
+func setGit(git vcs.System) setter {
+	return func(u *goUp) {
+		u.git = git
+	}
+}
+
+// setGoGet sets the VCS go-get.
+func setGoGet(goGet vcs.System) setter {
+	return func(u *goUp) {
+		u.goGet = goGet
+	}
 }

@@ -10,31 +10,31 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-	uperrs "github.com/rvflash/goup/internal/errors"
+	errup "github.com/rvflash/goup/internal/errors"
 )
 
 const charset = "utf8"
 
 func TestNewCharset(t *testing.T) {
-	is.New(t).Equal(uperrs.NewCharset(charset).Error(), "unsupported charset: "+charset)
+	is.New(t).Equal(errup.NewCharset(charset).Error(), "unsupported charset: "+charset)
 }
 
 func TestNewSecurityIssue(t *testing.T) {
 	is.New(t).Equal(
-		uperrs.NewSecurityIssue("http://example.com").Error(),
+		errup.NewSecurityIssue("http://example.com").Error(),
 		"unsecured call to http://example.com cancelled: failed to list tags",
 	)
 }
 
 func TestNewMissingData(t *testing.T) {
 	var (
-		err = uperrs.NewMissingData(charset)
+		err = errup.NewMissingData(charset)
 		are = is.New(t)
 	)
-	are.True(errors.Is(err, uperrs.ErrMissing))      // wrong error kind
+	are.True(errors.Is(err, errup.ErrMissing))       // wrong error kind
 	are.True(strings.Contains(err.Error(), charset)) // missing source
 }
 
 func TestErrUp_Error(t *testing.T) {
-	is.New(t).Equal(uperrs.ErrRepository.Error(), "invalid repository")
+	is.New(t).Equal(errup.ErrRepository.Error(), "invalid repository")
 }
