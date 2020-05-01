@@ -14,11 +14,12 @@ issues:
         - gochecknoglobals
         - funlen
         - dupl
+        - gosec
     - path: main\.go
       text: "`buildVersion` is a global variable"
       linters:
         - gochecknoglobals
-    - path: internal/mod/file\.go
+    - path: pkg/mod/file\.go
       text: "G304: Potential file inclusion via variable"
       linters:
         - gosec

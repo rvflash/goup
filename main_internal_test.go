@@ -7,12 +7,12 @@ package main
 import (
 	"context"
 	"errors"
-	"io"
 	"strings"
 	"testing"
 
 	"github.com/matryer/is"
 	errup "github.com/rvflash/goup/internal/errors"
+	"github.com/rvflash/goup/internal/log"
 	"github.com/rvflash/goup/pkg/goup"
 )
 
@@ -37,32 +37,25 @@ func TestPatterns(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	var (
-		stderr = new(strings.Builder)
-		stdout = new(strings.Builder)
 		are    = is.New(t)
+		stderr = log.New(new(strings.Builder), false)
 		dt     = map[string]struct {
 			ctx    context.Context
 			cnf    goup.Config
 			args   []string
-			stderr io.Writer
-			stdout io.Writer
+			stderr log.Printer
 			err    error
 		}{
 			"default":      {err: errup.ErrMissing},
-			"no context":   {stdout: stdout, stderr: stderr, err: errup.ErrMod},
-			"context only": {ctx: context.Background(), stdout: stdout, stderr: stderr, err: errup.ErrMod},
-			"ok": {
-				ctx:    context.Background(),
-				cnf:    goup.Config{PrintVersion: true},
-				stdout: stdout,
-				stderr: stderr,
-			},
+			"no context":   {stderr: stderr, err: errup.ErrMod},
+			"context only": {ctx: context.Background(), stderr: stderr, err: errup.ErrMod},
+			"ok":           {ctx: context.Background(), cnf: goup.Config{PrintVersion: true}, stderr: stderr},
 		}
 	)
 	for name, tt := range dt {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
-			err := run(tt.ctx, tt.cnf, tt.args, tt.stdout, tt.stderr)
+			err := run(tt.ctx, tt.cnf, tt.args, tt.stderr)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 		})
 	}

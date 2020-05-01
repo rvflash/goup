@@ -6,7 +6,7 @@ package mock_mod
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	mod "github.com/rvflash/goup/internal/mod"
+	mod "github.com/rvflash/goup/pkg/mod"
 	reflect "reflect"
 )
 
@@ -47,6 +47,20 @@ func (mr *MockModMockRecorder) Module() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Module", reflect.TypeOf((*MockMod)(nil).Module))
 }
 
+// Name mocks base method
+func (m *MockMod) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockModMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockMod)(nil).Name))
+}
+
 // Dependencies mocks base method
 func (m *MockMod) Dependencies() []mod.Module {
 	m.ctrl.T.Helper()
@@ -59,4 +73,47 @@ func (m *MockMod) Dependencies() []mod.Module {
 func (mr *MockModMockRecorder) Dependencies() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dependencies", reflect.TypeOf((*MockMod)(nil).Dependencies))
+}
+
+// UpdateRequire mocks base method
+func (m *MockMod) UpdateRequire(path, version string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRequire", path, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRequire indicates an expected call of UpdateRequire
+func (mr *MockModMockRecorder) UpdateRequire(path, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequire", reflect.TypeOf((*MockMod)(nil).UpdateRequire), path, version)
+}
+
+// UpdateReplace mocks base method
+func (m *MockMod) UpdateReplace(oldPath, newVersion string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateReplace", oldPath, newVersion)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateReplace indicates an expected call of UpdateReplace
+func (mr *MockModMockRecorder) UpdateReplace(oldPath, newVersion interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReplace", reflect.TypeOf((*MockMod)(nil).UpdateReplace), oldPath, newVersion)
+}
+
+// Format mocks base method
+func (m *MockMod) Format() ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Format")
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Format indicates an expected call of Format
+func (mr *MockModMockRecorder) Format() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Format", reflect.TypeOf((*MockMod)(nil).Format))
 }

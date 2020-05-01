@@ -2,6 +2,7 @@ language: go
 
 go:
   - 1.13
+  - 1.14
 
 env:
   - GO111MODULE=on
@@ -9,7 +10,7 @@ env:
 
 before_install:
   - go get -t -v ./...
-  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.23.6
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.25.0
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic ./...

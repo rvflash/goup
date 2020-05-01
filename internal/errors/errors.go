@@ -41,8 +41,10 @@ const (
 	ErrMissing = errUp("missing data")
 	// ErrMod is returned when the go.mod file is invalid.
 	ErrMod = errUp("invalid go.mod")
-	// ErrSystem is returned when the VCS does not respond to the remote request.
-	ErrSystem = errUp("invalid VCS")
+	// ErrNotModified is returned when the file has not changed.
+	ErrNotModified = errUp("not modified")
 	// ErrRepository is returned when the repository is invalid.
 	ErrRepository = errUp("invalid repository")
+	// ErrSystem is returned when the VCS does not respond to the remote request.
+	ErrSystem = errUp("invalid VCS")
 )
