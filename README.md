@@ -12,6 +12,7 @@ to retrieve the list of remote tags and performs comparisons to advise to update
 The main purpose is using it as a linter in continuous integration or in development process,
 but you can also use it to keep updated the `go.mod` files, see the `-f` option.
 
+
 ## Features
 
 1. No dependency. Pure Go tool designed to be used as a linter. Zero call to `go` or `git` command line tools.
@@ -23,6 +24,8 @@ major+minor and by default, path.
 1. As with go1.14, you can use the `GOINSECURE` environment variable to skip certificate validation and do
 not require an HTTPS connection. Since version `v0.3.0`, `GOPRIVATE` has the same behavior. 
 1. Can amend on demand `go.mod` files with deprecated dependencies to update them.
+1. Since version `v0.4.0`, a colorized output in a TTY. 
+
 
 ## Demo
 
@@ -43,13 +46,13 @@ on the [releases page](https://github.com/rvflash/goup/releases).
 ### Go
 
 ```shell
-GO111MODULE=on go get github.com/rvflash/goup@v0.4.0
+GO111MODULE=on go get github.com/rvflash/goup@v0.4.1
 ```
 
 ### Docker
 
 ```shell
-docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.0 goup -V
+docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.1 goup -V
 ```
 
 ## Usage
