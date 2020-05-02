@@ -94,12 +94,12 @@ func TestLogger_Debugf(t *testing.T) {
 
 func TestLogger_SetVerbose(t *testing.T) {
 	f, cleanup := newFile(t)
-	t.Cleanup(func() {
+	defer func() {
 		err := cleanup()
 		if err != nil {
 			t.Error(err)
 		}
-	})
+	}()
 	// Default
 	var (
 		are = is.New(t)
