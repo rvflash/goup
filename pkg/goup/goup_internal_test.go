@@ -25,7 +25,7 @@ import (
 	mockVCS "github.com/rvflash/goup/testdata/mock/vcs"
 )
 
-func TestGoUp_CheckModule(t *testing.T) {
+func TestGoUp_CheckDependency(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -70,7 +70,7 @@ func TestGoUp_CheckModule(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			u := newGoUp(tt.cnf, setGoGet(tt.system), setGit(tt.system))
-			e := u.checkModule(tt.ctx, tt.module)
+			e := u.checkDependency(tt.ctx, tt.module)
 			are.Equal(tt.level, e.Level())                    // mismatch level
 			are.True(strings.Contains(e.Format(), tt.format)) // mismatch format
 		})
