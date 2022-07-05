@@ -8,8 +8,8 @@ package goup
 import (
 	"context"
 	"errors"
+	"github.com/rvflash/workr"
 	"io/ioutil"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -88,43 +88,11 @@ func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 	}
 	ctx, cancel := context.WithTimeout(parent, e.Timeout)
 	defer cancel()
-	var (
-		w8 sync.WaitGroup
-		ko uint64
-	)
-	for _, d := range file.Dependencies() {
-		w8.Add(delta)
-		go func(d mod.Module) {
-			defer w8.Done()
-			log := e.checkModule(ctx, d)
-			v, ok := log.OutDated()
-			if !ok || !e.ForceUpdate {
-				if log.Level() < InfoLevel {
-					atomic.AddUint64(&ko, delta)
-				}
-				e.log <- log
-				return
-			}
-			var err error
-			if d.Replacement() {
-				err = file.UpdateReplace(d.Path(), v)
-			} else {
-				err = file.UpdateRequire(d.Path(), v)
-			}
-			if err != nil {
-				atomic.AddUint64(&ko, delta)
-				e.log <- newFailure(err, d)
-				return
-			}
-			e.log <- newUpdate(d, v)
-		}(d)
-	}
-	w8.Wait()
-
+	bad := e.checkDependencies(ctx, file)
 	if !e.ForceUpdate {
 		return
 	}
-	if ko > 0 {
+	if bad > 0 {
 		e.log <- newError(errup.ErrNotModified, file)
 		return
 	}
@@ -134,8 +102,43 @@ func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 	}
 }
 
-// checkModule checks the version of the given module based on this configuration.
-func (e *goUp) checkModule(ctx context.Context, dep mod.Module) *Entry {
+// Errors are internally managed with a dedicated channel.
+// So we only return each task as succeeded and eventually the number of fails.
+func (e *goUp) checkDependencies(parent context.Context, file mod.Mod) uint64 {
+	grp, ctx := workr.WithContext(parent)
+	var bad uint64
+	for _, d := range file.Dependencies() {
+		dep := d
+		grp.Go(func() (err error) {
+			log := e.checkDependency(ctx, dep)
+			v, ok := log.OutDated()
+			if !ok || !e.ForceUpdate {
+				if log.Level() < InfoLevel {
+					atomic.AddUint64(&bad, delta)
+				}
+				e.log <- log
+				return nil
+			}
+			if dep.Replacement() {
+				err = file.UpdateReplace(dep.Path(), v)
+			} else {
+				err = file.UpdateRequire(dep.Path(), v)
+			}
+			if err != nil {
+				atomic.AddUint64(&bad, delta)
+				e.log <- newFailure(err, dep)
+			} else {
+				e.log <- newUpdate(dep, v)
+			}
+			return nil
+		})
+	}
+	_ = grp.Wait()
+	return bad
+}
+
+// checkDependency checks the version of the given module based on this configuration.
+func (e *goUp) checkDependency(ctx context.Context, dep mod.Module) *Entry {
 	if e.ExcludeIndirect && dep.Indirect() {
 		return newSkip(dep)
 	}
