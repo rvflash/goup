@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/app"
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/log"
@@ -32,6 +31,7 @@ const (
 )
 
 func TestOpen(t *testing.T) {
+	t.Parallel()
 	const wv = log.Prefix + "version " + version + "\n"
 	var (
 		are = is.New(t)
@@ -103,9 +103,10 @@ func TestOpen(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			var stderr = new(strings.Builder)
 			a := newApp(t, stderr)
 			a.Config = tt.config
@@ -116,6 +117,7 @@ func TestOpen(t *testing.T) {
 }
 
 func TestApp_Check(t *testing.T) {
+	t.Parallel()
 	defer func() {
 		if r := recover(); r != nil {
 			t.Error("expected no panic")
@@ -126,13 +128,18 @@ func TestApp_Check(t *testing.T) {
 }
 
 func TestWithChecker(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
+
 	t.Run("default", func(t *testing.T) {
+		t.Parallel()
 		a, err := app.Open(version, app.WithChecker(nil))
 		are.True(errors.Is(err, errup.ErrMissing)) // mismatch error
 		are.True(a == nil)                         // mismatch result
 	})
+
 	t.Run("ok", func(t *testing.T) {
+		t.Parallel()
 		a, err := app.Open(version, app.WithChecker(goup.Check))
 		are.Equal(err, nil) // mismatch error
 		are.True(a != nil)  // mismatch result
@@ -140,13 +147,18 @@ func TestWithChecker(t *testing.T) {
 }
 
 func TestWithLogger(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
+
 	t.Run("default", func(t *testing.T) {
+		t.Parallel()
 		a, err := app.Open(version, app.WithLogger(nil))
 		are.True(errors.Is(err, errup.ErrMissing)) // mismatch error
 		are.True(a == nil)                         // mismatch result
 	})
+
 	t.Run("ok", func(t *testing.T) {
+		t.Parallel()
 		b := new(strings.Builder)
 		l := log.New(b, false)
 		a, err := app.Open(version, app.WithLogger(l))
@@ -156,13 +168,18 @@ func TestWithLogger(t *testing.T) {
 }
 
 func TestWithParser(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
+
 	t.Run("default", func(t *testing.T) {
+		t.Parallel()
 		a, err := app.Open(version, app.WithParser(nil))
 		are.True(errors.Is(err, errup.ErrMissing)) // mismatch error
 		are.True(a == nil)                         // mismatch result
 	})
+
 	t.Run("ok", func(t *testing.T) {
+		t.Parallel()
 		a, err := app.Open(version, app.WithParser(mod.Parse))
 		are.Equal(err, nil) // mismatch error
 		are.True(a != nil)  // mismatch result
@@ -204,6 +221,7 @@ func (p *parser) Parse(path string) (*mod.File, error) {
 }
 
 func newApp(t *testing.T, stderr io.Writer) *app.App {
+	t.Helper()
 	var (
 		c = &checker{}
 		p = &parser{}

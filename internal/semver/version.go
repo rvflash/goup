@@ -78,8 +78,7 @@ func New(version string) *Version {
 }
 
 func trim(s string) string {
-	p := strings.LastIndex(s, "/")
-	if p > -1 {
+	if p := strings.LastIndex(s, "/"); p > -1 {
 		return s[p+1:]
 	}
 	return s

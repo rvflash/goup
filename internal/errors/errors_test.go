@@ -16,10 +16,12 @@ import (
 const charset = "utf8"
 
 func TestNewCharset(t *testing.T) {
+	t.Parallel()
 	is.New(t).Equal(errup.NewCharset(charset).Error(), "unsupported charset: "+charset)
 }
 
 func TestNewSecurityIssue(t *testing.T) {
+	t.Parallel()
 	is.New(t).Equal(
 		errup.NewSecurityIssue("http://example.com").Error(),
 		"unsecured call to http://example.com cancelled: failed to list tags",
@@ -27,6 +29,7 @@ func TestNewSecurityIssue(t *testing.T) {
 }
 
 func TestNewMissingData(t *testing.T) {
+	t.Parallel()
 	var (
 		err = errup.NewMissingData(charset)
 		are = is.New(t)
@@ -36,5 +39,6 @@ func TestNewMissingData(t *testing.T) {
 }
 
 func TestErrUp_Error(t *testing.T) {
+	t.Parallel()
 	is.New(t).Equal(errup.ErrRepository.Error(), "invalid repository")
 }

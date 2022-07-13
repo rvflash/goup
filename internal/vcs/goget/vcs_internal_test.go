@@ -16,6 +16,7 @@ import (
 )
 
 func TestParseMetaGoImport(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -40,9 +41,10 @@ func TestParseMetaGoImport(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			f, err := os.Open(filepath.Join(tt.path...))
 			if err != nil {
 				t.Fatal(err)
@@ -56,6 +58,7 @@ func TestParseMetaGoImport(t *testing.T) {
 }
 
 func TestCharsetReader(t *testing.T) {
+	t.Parallel()
 	var (
 		are   = is.New(t)
 		input = strings.NewReader("")
@@ -70,9 +73,10 @@ func TestCharsetReader(t *testing.T) {
 			"ascii":   {in: "ascii", out: input},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out, err := charsetReader(tt.in, input)
 			are.Equal(err != nil, tt.fail) // mismatch error
 			are.Equal(out, tt.out)         // mismatch result

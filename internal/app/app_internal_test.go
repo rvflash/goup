@@ -18,12 +18,14 @@ const (
 )
 
 func TestFilePath(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
 	are.Equal(filePath(root), modFile)    // mismatch root only
 	are.Equal(filePath(modFile), modFile) // mismatch path
 }
 
 func TestWalkPath(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		res  []string

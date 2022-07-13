@@ -33,7 +33,7 @@ type ClientChooser interface {
 	AllowInsecure(path string) bool
 }
 
-// List of supported schemes
+// List of supported schemes.
 const (
 	HTTPS  = "https"
 	HTTP   = "http"

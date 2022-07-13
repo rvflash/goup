@@ -10,7 +10,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/pkg/mod"
@@ -25,6 +24,7 @@ const (
 )
 
 func TestNewEntry(t *testing.T) {
+	t.Parallel()
 	defer func() {
 		if r := recover(); r != nil {
 			t.Error("expected no panic")
@@ -38,6 +38,7 @@ func TestNewEntry(t *testing.T) {
 }
 
 func TestNewCheck(t *testing.T) {
+	t.Parallel()
 	var (
 		dep  mod.Module
 		are  = is.New(t)
@@ -56,6 +57,7 @@ func TestNewCheck(t *testing.T) {
 }
 
 func TestNewError(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		ctrl = gomock.NewController(t)
@@ -80,8 +82,8 @@ func TestNewError(t *testing.T) {
 	)
 	defer ctrl.Finish()
 
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			msg := newError(tt.err, tt.file)
 			are.Equal(msg.Level(), ErrorLevel)               // mismatch level
@@ -94,6 +96,7 @@ func TestNewError(t *testing.T) {
 }
 
 func TestNewFailure(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		ctrl = gomock.NewController(t)
@@ -118,8 +121,8 @@ func TestNewFailure(t *testing.T) {
 	)
 	defer ctrl.Finish()
 
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			msg := newFailure(tt.err, tt.dep)
 			are.Equal(msg.Level(), ErrorLevel)               // mismatch level
@@ -132,6 +135,7 @@ func TestNewFailure(t *testing.T) {
 }
 
 func TestNewSkip(t *testing.T) {
+	t.Parallel()
 	var (
 		dep  mod.Module
 		are  = is.New(t)
@@ -150,6 +154,7 @@ func TestNewSkip(t *testing.T) {
 }
 
 func TestNewUpdate(t *testing.T) {
+	t.Parallel()
 	var (
 		dep  mod.Module
 		are  = is.New(t)
@@ -168,6 +173,7 @@ func TestNewUpdate(t *testing.T) {
 }
 
 func TestNewOutOfDate(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		ctrl = gomock.NewController(t)

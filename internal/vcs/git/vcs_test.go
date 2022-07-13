@@ -12,7 +12,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
-
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
@@ -26,11 +25,13 @@ const (
 )
 
 func TestVCS_CanFetch(t *testing.T) {
+	t.Parallel()
 	var s git.VCS
 	is.New(t).True(s.CanFetch("")) // always true.
 }
 
 func TestVCS_FetchPath(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -49,8 +50,8 @@ func TestVCS_FetchPath(t *testing.T) {
 			"ok":              {cli: newMockClientChooser(ctrl), ctx: ctx, in: pkgName},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			s := git.New(tt.cli)
 			_, err := s.FetchPath(tt.ctx, tt.in)
@@ -60,6 +61,7 @@ func TestVCS_FetchPath(t *testing.T) {
 }
 
 func TestVCS_FetchURL(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -79,8 +81,8 @@ func TestVCS_FetchURL(t *testing.T) {
 			"Ok":              {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, in: repoURL},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			s := git.New(tt.cli)
 			_, err := s.FetchURL(tt.ctx, tt.in)

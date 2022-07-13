@@ -8,18 +8,18 @@ package goup
 import (
 	"context"
 	"errors"
-	"github.com/rvflash/workr"
 	"io/ioutil"
 	"sync/atomic"
 	"time"
 
-	errup "github.com/rvflash/goup/internal/errors"
+	errs "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/path"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
 	"github.com/rvflash/goup/internal/vcs/goget"
 	"github.com/rvflash/goup/pkg/mod"
+	"github.com/rvflash/workr"
 )
 
 // Config is used as the settings of the GoUp application.
@@ -83,7 +83,7 @@ const (
 func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 	defer close(e.log)
 	if !e.ready(parent) || file == nil {
-		e.log <- newError(errup.ErrMod, file)
+		e.log <- newError(errs.ErrMod, file)
 		return
 	}
 	ctx, cancel := context.WithTimeout(parent, e.Timeout)
@@ -93,11 +93,10 @@ func (e *goUp) checkFile(parent context.Context, file mod.Mod) {
 		return
 	}
 	if bad > 0 {
-		e.log <- newError(errup.ErrNotModified, file)
+		e.log <- newError(errs.ErrNotModified, file)
 		return
 	}
-	err := updateFile(file)
-	if err != nil {
+	if err := updateFile(file); err != nil {
 		e.log <- newError(err, file)
 	}
 }
@@ -167,13 +166,13 @@ func (e *goUp) checkDependency(ctx context.Context, dep mod.Module) *Entry {
 		}
 		return newCheck(dep)
 	}
-	return newFailure(errup.ErrSystem, dep)
+	return newFailure(errs.ErrSystem, dep)
 }
 
 func updateFile(file mod.Mod) error {
 	buf, err := file.Format()
 	if err != nil {
-		if !errors.Is(err, errup.ErrNotModified) {
+		if !errors.Is(err, errs.ErrNotModified) {
 			return err
 		}
 		return nil
@@ -200,7 +199,7 @@ func latest(versions semver.Tags, dep mod.Module, major, majorMinor bool) (semve
 
 func onlyTag(d mod.Module, globs string) error {
 	if path.Match(globs, d.Path()) && !d.Version().IsTag() {
-		return errup.ErrExpectedTag
+		return errs.ErrExpectedTag
 	}
 	return nil
 }

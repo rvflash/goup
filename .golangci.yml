@@ -1,9 +1,29 @@
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - prefix(github.com)
+      - prefix(golang.org)
+      - prefix(google.golang.org)
+      - prefix(gopkg.in/src-d/go-git.v4)
+
 linters:
   enable-all: true
   disable:
     - wsl
     - godox
     - gomnd
+    - varnamelen
+    - wrapcheck
+    - nonamedreturns
+    - nlreturn
+    - goerr113
+    - ireturn
+    - exhaustive
+    - exhaustivestruct
+    - exhaustruct
+    - cyclop
+    - gofumpt
 
 issues:
   exclude-use-default: false
@@ -15,14 +35,22 @@ issues:
         - funlen
         - dupl
         - gosec
+        - noctx
+        - forcetypeassert
+        - containedctx
+
     - path: main\.go
-      text: "`buildVersion` is a global variable"
+      text: "^buildVersion is a global variable"
       linters:
         - gochecknoglobals
     - path: pkg/mod/file\.go
       text: "G304: Potential file inclusion via variable"
       linters:
         - gosec
+    - path: pkg/mod/file\.go
+      text: "type assertion must be checked"
+      linters:
+        - forcetypeassert
     - path: internal/app/app_test\.go
       text: "SA1012: do not pass a nil Context"
       linters:
@@ -31,3 +59,21 @@ issues:
       text: "G402: TLS InsecureSkipVerify set true."
       linters:
         - gosec
+    - linters:
+        - tparallel
+      text: "subtests should call t.Parallel"
+    - path: vcs_test\.go
+      linters:
+        - paralleltest
+    - path: pkg/goup/*
+      linters:
+        - paralleltest
+
+    - linters:
+        - lll
+      source: "^//go:generate "
+
+    # temporary "fix" waiting for https://github.com/kunwardeep/paralleltest/issues/14.
+    - linters:
+        - paralleltest
+      text: "does not use range value in test Run"

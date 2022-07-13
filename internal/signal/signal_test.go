@@ -15,6 +15,7 @@ import (
 )
 
 func TestBackground(t *testing.T) {
+	t.Parallel()
 	var (
 		c   int32
 		are = is.New(t)

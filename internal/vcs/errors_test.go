@@ -14,6 +14,7 @@ import (
 )
 
 func TestErrorf(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -37,9 +38,10 @@ func TestErrorf(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			err := vcs.Errorf(tt.name, tt.args...)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 			if tt.err != nil {

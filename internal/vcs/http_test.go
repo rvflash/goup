@@ -16,6 +16,7 @@ import (
 const repo = "google.golang.org/grpc"
 
 func TestHTTP_AllowInsecure(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -30,9 +31,10 @@ func TestHTTP_AllowInsecure(t *testing.T) {
 			"insecure match": {repo: repo, goInsecure: repo, out: true},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			cli := vcs.NewHTTPClient(time.Second, tt.goInsecure)
 			are.Equal(cli.AllowInsecure(tt.repo), tt.out)                             // mismatch result
 			are.Equal(cli.ClientFor(tt.repo).(*http.Client).Transport != nil, tt.out) // mismatch client
@@ -41,6 +43,7 @@ func TestHTTP_AllowInsecure(t *testing.T) {
 }
 
 func TestHTTP_ClientFor(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		req *http.Request

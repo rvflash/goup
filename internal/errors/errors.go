@@ -25,26 +25,26 @@ func NewMissingData(name string) error {
 	return fmt.Errorf("%s: %w", name, ErrMissing)
 }
 
-type errUp string
+type upError string
 
 // Error implements the error interface.
-func (e errUp) Error() string {
+func (e upError) Error() string {
 	return string(e)
 }
 
 const (
 	// ErrExpectedTag is returned when the version is not a release tag.
-	ErrExpectedTag = errUp("release tag expected")
+	ErrExpectedTag = upError("release tag expected")
 	// ErrFetch is returned when the fetching of versions failed.
-	ErrFetch = errUp("failed to list tags")
+	ErrFetch = upError("failed to list tags")
 	// ErrMissing is returned when the data is missing.
-	ErrMissing = errUp("missing data")
+	ErrMissing = upError("missing data")
 	// ErrMod is returned when the go.mod file is invalid.
-	ErrMod = errUp("invalid go.mod")
+	ErrMod = upError("invalid go.mod")
 	// ErrNotModified is returned when the file has not changed.
-	ErrNotModified = errUp("not modified")
+	ErrNotModified = upError("not modified")
 	// ErrRepository is returned when the repository is invalid.
-	ErrRepository = errUp("invalid repository")
+	ErrRepository = upError("invalid repository")
 	// ErrSystem is returned when the VCS does not respond to the remote request.
-	ErrSystem = errUp("invalid VCS")
+	ErrSystem = upError("invalid VCS")
 )
