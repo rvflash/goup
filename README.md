@@ -1,7 +1,7 @@
 # Go Up
 
 [![GoDoc](https://godoc.org/github.com/rvflash/goup?status.svg)](https://godoc.org/github.com/rvflash/goup)
-[![Build Status](https://api.travis-ci.org/rvflash/goup.svg?branch=master)](https://travis-ci.org/rvflash/goup?branch=master)
+[![Build Status](https://github.com/rvflash/goup/workflows/build/badge.svg)](https://github.com/rvflash/goup/actions?workflow=build)
 [![Code Coverage](https://codecov.io/gh/rvflash/goup/branch/master/graph/badge.svg)](https://codecov.io/gh/rvflash/goup)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rvflash/goup?)](https://goreportcard.com/report/github.com/rvflash/goup)
 
