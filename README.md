@@ -52,7 +52,7 @@ GO111MODULE=on go get github.com/rvflash/goup@v0.4.3
 ### Docker
 
 ```shell
-docker run --rm -v $(pwd):/pkg rvflash/goup:v0.4.3 goup -V
+docker run --rm -v $(pwd):/pkg rvflash/goup:latest goup -V
 ```
 
 ## Usage
