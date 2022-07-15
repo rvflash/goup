@@ -57,19 +57,19 @@ func TestFile_Format(t *testing.T) {
 	buf, err := out.Format()
 	are.True(errors.Is(err, errup.ErrNotModified))
 	got, err := ioutil.ReadFile(name)
-	are.NoErr(err)                       	// expected source file
-	are.Equal(buf, normalizeNewlines(got))	// expected no change
-	are.NoErr(out.UpdateReplace(d0, v0))	// update replace
-	are.NoErr(out.UpdateRequire(d1, v1))	// update require
+	are.NoErr(err)                         // expected source file
+	are.Equal(buf, normalizeNewlines(got)) // expected no change
+	are.NoErr(out.UpdateReplace(d0, v0))   // update replace
+	are.NoErr(out.UpdateRequire(d1, v1))   // update require
 	got, err = out.Format()
 	are.NoErr(err) // writing failed
 	exp, err := ioutil.ReadFile(filepath.Join(updatedGoMod...))
-	are.NoErr(err)      // missing expecting
+	are.NoErr(err)                                            // missing expecting
 	are.Equal(normalizeNewlines(got), normalizeNewlines(exp)) // mismatch data
 }
 
 func normalizeNewlines(buf []byte) []byte {
-    return bytes.ReplaceAll(buf, []byte{13, 10}, []byte{10})
+	return bytes.ReplaceAll(buf, []byte{13, 10}, []byte{10})
 }
 
 func TestFile_Format2(t *testing.T) {
