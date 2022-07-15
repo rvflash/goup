@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -21,7 +22,7 @@ import (
 
 const (
 	version      = "v0.1.0"
-	notFound     = "/not-found"
+	notFound     = string(filepath.Separator) + "not-found"
 	fileBuggy    = "ok+err"
 	fileOutdated = "now ok"
 	fileErr      = "err"

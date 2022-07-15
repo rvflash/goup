@@ -20,8 +20,8 @@ const (
 func TestFilePath(t *testing.T) {
 	t.Parallel()
 	are := is.New(t)
-	are.Equal(filePath(root), filepath.FromSlash(modFile))    // mismatch root only
-	are.Equal(filePath(modFile), filepath.FromSlash(modFile)) // mismatch path
+	are.Equal(filepath.ToSlash(filePath(root)), modFile)    // mismatch root only
+	are.Equal(filepath.ToSlash(filePath(modFile)), modFile) // mismatch path
 }
 
 func TestWalkPath(t *testing.T) {
