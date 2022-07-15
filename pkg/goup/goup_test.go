@@ -9,12 +9,12 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/pkg/goup"
 	"github.com/rvflash/goup/pkg/mod"
 )
 
 func TestCheck(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		file mod.Mod
@@ -25,6 +25,7 @@ func TestCheck(t *testing.T) {
 }
 
 func TestEntry_OutDated(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		msg = &goup.Entry{}

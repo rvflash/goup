@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/semver"
 )
 
@@ -27,6 +26,7 @@ func tags() semver.Tags {
 }
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -79,9 +79,10 @@ func TestNew(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out := semver.New(tt.in)
 			are.Equal(out.IsTag(), tt.tag)             // mismatch tag
 			are.Equal(out.IsValid(), tt.valid)         // mismatch validity
@@ -96,6 +97,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestTags_Len(t *testing.T) {
+	t.Parallel()
 	var (
 		are  = is.New(t)
 		list semver.Tags
@@ -107,6 +109,7 @@ func TestTags_Len(t *testing.T) {
 }
 
 func TestTags_Not(t *testing.T) {
+	t.Parallel()
 	var (
 		in  = tags()
 		are = is.New(t)

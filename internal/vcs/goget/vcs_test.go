@@ -27,6 +27,7 @@ const (
 )
 
 func TestVCS_CanFetch(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	var (
@@ -44,8 +45,8 @@ func TestVCS_CanFetch(t *testing.T) {
 			"Ok":                    {in: pkgName, out: true},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			s := goget.New(mock_vcs.NewMockClientChooser(ctrl), mock_vcs.NewMockSystem(ctrl))
 			are.Equal(s.CanFetch(tt.in), tt.out) // mismatch fetch
@@ -54,6 +55,7 @@ func TestVCS_CanFetch(t *testing.T) {
 }
 
 func TestVCS_FetchPath(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	var (
@@ -89,8 +91,8 @@ func TestVCS_FetchPath(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			s := goget.New(tt.cli, tt.git)
 			res, err := s.FetchPath(tt.ctx, tt.path)
@@ -101,6 +103,7 @@ func TestVCS_FetchPath(t *testing.T) {
 }
 
 func TestVCS_FetchURL(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	var (
@@ -149,8 +152,8 @@ func TestVCS_FetchURL(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			s := goget.New(tt.cli, tt.git)
 			res, err := s.FetchURL(tt.ctx, tt.uri)

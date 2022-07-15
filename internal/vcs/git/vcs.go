@@ -11,15 +11,15 @@ import (
 	"path"
 	"strings"
 
+	"github.com/rvflash/goup/internal/errors"
+	"github.com/rvflash/goup/internal/semver"
+	"github.com/rvflash/goup/internal/vcs"
+
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/storage"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
-
-	"github.com/rvflash/goup/internal/errors"
-	"github.com/rvflash/goup/internal/semver"
-	"github.com/rvflash/goup/internal/vcs"
 )
 
 const (
@@ -150,7 +150,7 @@ func tags(ctx context.Context, c chan *reference) (semver.Tags, error) {
 }
 
 const (
-	// example.com/group/pkg, so with 2 slashes: 3 parts
+	// example.com/group/pkg, so with 2 slashes: 3 parts.
 	stdNumPart = 3
 	slash      = "/"
 )
@@ -161,8 +161,7 @@ type transport struct {
 }
 
 func (t transport) rawURL(uri string) string {
-	p := strings.Split(uri, slash)
-	if len(p) > stdNumPart {
+	if p := strings.Split(uri, slash); len(p) > stdNumPart {
 		// Works around with sub-packages.
 		uri = path.Join(p[:stdNumPart]...)
 	}

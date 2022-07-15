@@ -13,6 +13,7 @@ import (
 )
 
 func TestIsSecureScheme(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -27,15 +28,17 @@ func TestIsSecureScheme(t *testing.T) {
 			"ssh+git": {in: vcs.SSHGit, out: true},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			are.Equal(vcs.IsSecureScheme(tt.in), tt.out) // mismatch result
 		})
 	}
 }
 
 func TestRepoPath(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		uri *url.URL
@@ -49,6 +52,7 @@ func TestRepoPath(t *testing.T) {
 }
 
 func TestURLScheme(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -63,9 +67,10 @@ func TestURLScheme(t *testing.T) {
 			"ssh+git": {in: vcs.SSHGit, out: "ssh://git@"},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			are.Equal(vcs.URLScheme(tt.in), tt.out) // mismatch result
 		})
 	}

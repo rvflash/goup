@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/log"
 )
 
@@ -25,8 +24,8 @@ const (
 )
 
 func TestNew(t *testing.T) {
-	// /dev/null
-	l := log.New(nil, false)
+	t.Parallel()
+	l := log.New(nil, false) // /dev/null
 	callf(t, l, fDebugName, d0)
 	callf(t, l, fErrorName, d0)
 	callf(t, l, fInfoName, d0)
@@ -34,13 +33,16 @@ func TestNew(t *testing.T) {
 }
 
 func TestDevNull(t *testing.T) {
+	t.Parallel()
 	l := log.DevNull()
 	callf(t, l, fDebugName, d0)
 	callf(t, l, fErrorName, d0)
 	callf(t, l, fInfoName, d0)
 	callf(t, l, fWarnName, d0)
 }
+
 func TestLogger_Debugf(t *testing.T) {
+	t.Parallel()
 	const (
 		pattern  = "%s, %s (%s)"
 		blank    = "goup: \n"
@@ -73,9 +75,10 @@ func TestLogger_Debugf(t *testing.T) {
 			"Verbose Debugf with args":    {method: fDebugName, verbose: true, in: pattern, args: args, out: withArgs},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out, cleanup := newFile(t)
 			defer func() {
 				err := cleanup()
@@ -93,6 +96,7 @@ func TestLogger_Debugf(t *testing.T) {
 }
 
 func TestLogger_SetVerbose(t *testing.T) {
+	t.Parallel()
 	f, cleanup := newFile(t)
 	defer func() {
 		err := cleanup()
@@ -121,6 +125,7 @@ func TestLogger_SetVerbose(t *testing.T) {
 }
 
 func callf(t *testing.T, w log.Printer, method string, format string, args ...interface{}) {
+	t.Helper()
 	switch method {
 	case fDebugName:
 		w.Debugf(format, args...)
@@ -136,6 +141,7 @@ func callf(t *testing.T, w log.Printer, method string, format string, args ...in
 }
 
 func readFile(t *testing.T, f *os.File) (string, int) {
+	t.Helper()
 	buf, err := ioutil.ReadFile(f.Name())
 	if err != nil {
 		t.Error(err)
@@ -145,6 +151,7 @@ func readFile(t *testing.T, f *os.File) (string, int) {
 }
 
 func newFile(t *testing.T) (*os.File, func() error) {
+	t.Helper()
 	f, err := ioutil.TempFile("", log.Prefix)
 	if err != nil {
 		t.Fatal(err)

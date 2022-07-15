@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"os"
 	"strings"
@@ -14,7 +15,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"github.com/rvflash/goup/internal/app"
-	"github.com/rvflash/goup/internal/errors"
+	errs "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/log"
 	"github.com/rvflash/goup/internal/signal"
 	"github.com/rvflash/goup/pkg/goup"
@@ -61,7 +62,7 @@ func main() {
 
 	err := run(signal.Background(), c, flag.Args(), l)
 	if err != nil {
-		if err != errors.ErrMod {
+		if !errors.Is(err, errs.ErrMod) {
 			l.Errorf(err.Error())
 		}
 		os.Exit(errorCode)
@@ -89,7 +90,7 @@ func run(ctx context.Context, cnf goup.Config, args []string, out log.Printer) e
 	a.Config = cnf
 
 	if a.Check(ctx, args) {
-		return errors.ErrMod
+		return errs.ErrMod
 	}
 	return nil
 }

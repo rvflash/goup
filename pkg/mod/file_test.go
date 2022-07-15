@@ -5,6 +5,7 @@
 package mod_test
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/pkg/mod"
 )
@@ -35,16 +35,19 @@ var (
 )
 
 func TestFile_Name(t *testing.T) {
+	t.Parallel()
 	var f mod.File
 	is.New(t).Equal(f.Name(), "")
 }
 
 func TestFile_Module(t *testing.T) {
+	t.Parallel()
 	var f mod.File
 	is.New(t).Equal(f.Module(), "")
 }
 
 func TestFile_Format(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
 	name, cleanup := newTmpGoMod(t)
 	defer cleanup()
@@ -54,18 +57,23 @@ func TestFile_Format(t *testing.T) {
 	buf, err := out.Format()
 	are.True(errors.Is(err, errup.ErrNotModified))
 	got, err := ioutil.ReadFile(name)
-	are.NoErr(err)                       // expected source file
-	are.Equal(buf, got)                  // expected no change
-	are.NoErr(out.UpdateReplace(d0, v0)) // update replace
-	are.NoErr(out.UpdateRequire(d1, v1)) // update require
+	are.NoErr(err)                         // expected source file
+	are.Equal(buf, normalizeNewlines(got)) // expected no change
+	are.NoErr(out.UpdateReplace(d0, v0))   // update replace
+	are.NoErr(out.UpdateRequire(d1, v1))   // update require
 	got, err = out.Format()
 	are.NoErr(err) // writing failed
 	exp, err := ioutil.ReadFile(filepath.Join(updatedGoMod...))
-	are.NoErr(err)      // missing expecting
-	are.Equal(got, exp) // mismatch data
+	are.NoErr(err)                                            // missing expecting
+	are.Equal(normalizeNewlines(got), normalizeNewlines(exp)) // mismatch data
+}
+
+func normalizeNewlines(buf []byte) []byte {
+	return bytes.ReplaceAll(buf, []byte{13, 10}, []byte{10})
 }
 
 func TestFile_Format2(t *testing.T) {
+	t.Parallel()
 	var f mod.File
 	are := is.New(t)
 	buf, err := f.Format()
@@ -74,11 +82,13 @@ func TestFile_Format2(t *testing.T) {
 }
 
 func TestFile_UpdateRequire(t *testing.T) {
+	t.Parallel()
 	var f mod.File
 	is.New(t).Equal(f.UpdateRequire(d0, v0), errup.ErrMod)
 }
 
 func TestFile_UpdateReplace(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
 	out, err := mod.Parse(filepath.Join(validGoMod...))
 	are.NoErr(err)
@@ -86,11 +96,13 @@ func TestFile_UpdateReplace(t *testing.T) {
 }
 
 func TestFile_UpdateReplace2(t *testing.T) {
+	t.Parallel()
 	var f mod.File
 	is.New(t).Equal(f.UpdateReplace(d0, v0), errup.ErrMod)
 }
 
 func TestOpen(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -106,9 +118,10 @@ func TestOpen(t *testing.T) {
 			"valid go.mod":   {in: validGoMod, module: d3, depLen: numDep},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out, err := mod.Parse(filepath.Join(tt.in...))
 			are.True(errors.Is(err, tt.err)) // mismatch error
 			if tt.err == nil {
@@ -121,6 +134,7 @@ func TestOpen(t *testing.T) {
 }
 
 func newTmpGoMod(t *testing.T) (name string, cleanup func()) {
+	t.Helper()
 	dir, err := ioutil.TempDir("", "goup")
 	if err != nil {
 		t.Fatal(err)

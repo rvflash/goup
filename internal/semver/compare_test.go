@@ -19,6 +19,7 @@ func (t tag) String() string {
 }
 
 func TestCompare(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -32,9 +33,10 @@ func TestCompare(t *testing.T) {
 			"=":       {v: tag("v0.2.3+12"), w: tag("v0.2.3")},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out := semver.Compare(tt.v, tt.w)
 			are.Equal(out, tt.out) // mismatch result
 		})
@@ -42,6 +44,7 @@ func TestCompare(t *testing.T) {
 }
 
 func TestLatest(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -53,9 +56,10 @@ func TestLatest(t *testing.T) {
 			"latest":  {in: tags(), out: v0},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out := semver.Latest(tt.in)
 			are.Equal(out, tt.out) // mismatch result
 		})
@@ -63,6 +67,7 @@ func TestLatest(t *testing.T) {
 }
 
 func TestLatestMinor(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -78,9 +83,10 @@ func TestLatestMinor(t *testing.T) {
 			"v2":        {in: tags(), major: "v2", out: v0},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out := semver.LatestMinor(tt.major, tt.in)
 			are.Equal(out, tt.out) // mismatch result
 		})
@@ -88,6 +94,7 @@ func TestLatestMinor(t *testing.T) {
 }
 
 func TestLatestPatch(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -103,9 +110,10 @@ func TestLatestPatch(t *testing.T) {
 			"v2":        {in: tags(), majorMinor: "v2.2", out: v0},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			out := semver.LatestPatch(tt.majorMinor, tt.in)
 			are.Equal(out, tt.out) // mismatch result
 		})

@@ -77,7 +77,8 @@ func (e *Entry) OutDated() (newVersion string, ok bool) {
 	if e == nil || e.Level() != WarnLevel || len(e.Args()) != newVersionPos+1 {
 		return
 	}
-	return e.Args()[newVersionPos].(string), true
+	newVersion, ok = e.Args()[newVersionPos].(string)
+	return
 }
 
 func newCheck(dep mod.Module) *Entry {

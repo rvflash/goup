@@ -17,6 +17,7 @@ import (
 )
 
 func TestPatterns(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -27,15 +28,17 @@ func TestPatterns(t *testing.T) {
 			"Ok":      {in: []string{"a", "b", "", "d", " e "}, out: "a,b,d,e"},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			are.Equal(tt.out, patterns(tt.in...)) // mismatch result
 		})
 	}
 }
 
 func TestRun(t *testing.T) {
+	t.Parallel()
 	var (
 		are    = is.New(t)
 		stderr = log.New(new(strings.Builder), false)
@@ -52,9 +55,10 @@ func TestRun(t *testing.T) {
 			"ok":           {ctx: context.Background(), cnf: goup.Config{PrintVersion: true}, stderr: stderr},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			err := run(tt.ctx, tt.cnf, tt.args, tt.stderr)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 		})

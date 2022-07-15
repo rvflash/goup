@@ -2,6 +2,9 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+//go:build linux && amd64
+// +build linux,amd64
+
 package signal_test
 
 import (
@@ -15,6 +18,7 @@ import (
 )
 
 func TestBackground(t *testing.T) {
+	t.Parallel()
 	var (
 		c   int32
 		are = is.New(t)

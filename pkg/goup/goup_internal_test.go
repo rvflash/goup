@@ -16,7 +16,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
-
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
@@ -26,6 +25,7 @@ import (
 )
 
 func TestGoUp_CheckDependency(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -66,8 +66,8 @@ func TestGoUp_CheckDependency(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			u := newGoUp(tt.cnf, setGoGet(tt.system), setGit(tt.system))
 			e := u.checkDependency(tt.ctx, tt.module)
@@ -78,6 +78,7 @@ func TestGoUp_CheckDependency(t *testing.T) {
 }
 
 func TestUpdateFile(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -97,8 +98,8 @@ func TestUpdateFile(t *testing.T) {
 		"Failed":       {file: newTmpMod(ctrl, filepath.Join(dir, "t1"), errup.ErrFetch), err: errup.ErrFetch},
 		"Default":      {file: newTmpMod(ctrl, filepath.Join(dir, "t2"), nil), updated: true},
 	}
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			err := updateFile(tt.file)
 			are.True(errors.Is(err, tt.err))                  // mismatch error
@@ -108,6 +109,7 @@ func TestUpdateFile(t *testing.T) {
 }
 
 func TestLatest(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	var (
@@ -144,8 +146,8 @@ func TestLatest(t *testing.T) {
 			},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			out, ok := latest(tt.in, tt.dep, tt.cnf.Major, tt.cnf.MajorMinor)
 			are.Equal(out, tt.out) // mismatch tag
@@ -155,6 +157,7 @@ func TestLatest(t *testing.T) {
 }
 
 func TestOnlyTag(t *testing.T) {
+	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	var (
@@ -180,14 +183,15 @@ func TestOnlyTag(t *testing.T) {
 			"Ok": {dep: newTag(ctrl, "v1.0.0"), paths: "example.com/pkg/*"},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
 			err := onlyTag(tt.dep, tt.paths)
 			are.Equal(err, tt.err) // mismatch error
 		})
 	}
 }
+
 func newModule(ctrl *gomock.Controller, indirect bool) *mockMod.MockModule {
 	m := mockMod.NewMockModule(ctrl)
 	m.EXPECT().Path().Return(repoName).AnyTimes()

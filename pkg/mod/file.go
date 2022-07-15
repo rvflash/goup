@@ -35,7 +35,7 @@ type Mod interface {
 	Dependencies() []Module
 	// UpdateRequire adds an update of this required module path to the given version.
 	UpdateRequire(path, version string) error
-	// UpdateRequire adds an update on the replacement of this module path to the given version.
+	// UpdateReplace adds an update on the replacement of this module path to the given version.
 	UpdateReplace(oldPath, newVersion string) error
 	// Format applies any requested updates to the file content.
 	Format() ([]byte, error)

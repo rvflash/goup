@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-
 	"github.com/rvflash/goup/internal/semver"
 )
 
@@ -19,7 +18,10 @@ const (
 )
 
 func TestModule_Version(t *testing.T) {
+	t.Parallel()
+
 	t.Run("default", func(t *testing.T) {
+		t.Parallel()
 		var (
 			mod = module{}
 			are = is.New(t)
@@ -32,7 +34,9 @@ func TestModule_Version(t *testing.T) {
 		are.True(!ok)     // unexpected exclude version
 		are.Equal(x, nil) // mismatch exclude version
 	})
+
 	t.Run("valued", func(t *testing.T) {
+		t.Parallel()
 		var (
 			v   = semver.New(version)
 			mod = module{

@@ -19,6 +19,7 @@ const (
 )
 
 func TestTags(t *testing.T) {
+	t.Parallel()
 	are := is.New(t)
 	ref := make(chan *reference, oneRef)
 	ctx := context.Background()
@@ -42,6 +43,7 @@ func TestTags(t *testing.T) {
 }
 
 func TestTransport_RawURL(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -55,14 +57,16 @@ func TestTransport_RawURL(t *testing.T) {
 			"git":     {in: transport{scheme: vcs.Git, extension: Ext}, out: "git://example.com/group/pkg.git"},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			are.Equal(tt.in.rawURL(repo), tt.out) // mismatch result
 		})
 	}
 }
 
 func TestTransport_RawURL2(t *testing.T) {
+	t.Parallel()
 	is.New(t).Equal(transport{}.rawURL(subRepo), repo)
 }

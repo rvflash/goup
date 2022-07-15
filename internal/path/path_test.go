@@ -12,6 +12,7 @@ import (
 )
 
 func TestMatch(t *testing.T) {
+	t.Parallel()
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
@@ -31,9 +32,10 @@ func TestMatch(t *testing.T) {
 			"Complex":      {glob: "b,d/e,f.*,a/b/c", target: "a/b/c", matched: true},
 		}
 	)
-	for name, tt := range dt {
-		tt := tt
+	for name, ts := range dt {
+		tt := ts
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			are.Equal(tt.matched, path.Match(tt.glob, tt.target)) // mismatch result
 		})
 	}

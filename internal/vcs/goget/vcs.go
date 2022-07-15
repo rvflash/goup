@@ -129,7 +129,7 @@ const (
 	attr    = "go-import"
 	content = "content"
 
-	// supported charsets
+	// supported charsets.
 	utf8  = "utf-8"
 	ascii = "ascii"
 )
