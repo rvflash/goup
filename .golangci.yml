@@ -5,7 +5,6 @@ linters-settings:
       - prefix(github.com)
       - prefix(golang.org)
       - prefix(google.golang.org)
-      - prefix(gopkg.in/src-d/go-git.v4)
 
 linters:
   enable-all: true
