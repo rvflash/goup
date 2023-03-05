@@ -5,7 +5,6 @@ linters-settings:
       - prefix(github.com)
       - prefix(golang.org)
       - prefix(google.golang.org)
-      - prefix(gopkg.in/src-d/go-git.v4)
 
 linters:
   enable-all: true
@@ -51,6 +50,10 @@ issues:
       text: "type assertion must be checked"
       linters:
         - forcetypeassert
+    - path: pkg/mod/file\.go
+      tex: "non-wrapping format verb for fmt.Errorf"
+      linters:
+        - errorlint
     - path: internal/app/app_test\.go
       text: "SA1012: do not pass a nil Context"
       linters:

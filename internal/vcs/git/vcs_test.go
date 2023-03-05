@@ -15,7 +15,7 @@ import (
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
-	mock_vcs "github.com/rvflash/goup/testdata/mock/vcs"
+	mockvcs "github.com/rvflash/goup/testdata/mock/vcs"
 )
 
 const (
@@ -45,8 +45,8 @@ func TestVCS_FetchPath(t *testing.T) {
 			err error
 		}{
 			"default":         {err: errup.ErrSystem},
-			"missing context": {cli: mock_vcs.NewMockClientChooser(ctrl), in: pkgName, err: errup.ErrSystem},
-			"missing path":    {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
+			"missing context": {cli: mockvcs.NewMockClientChooser(ctrl), in: pkgName, err: errup.ErrSystem},
+			"missing path":    {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
 			"ok":              {cli: newMockClientChooser(ctrl), ctx: ctx, in: pkgName},
 		}
 	)
@@ -75,10 +75,10 @@ func TestVCS_FetchURL(t *testing.T) {
 			err error
 		}{
 			"Default":         {err: errup.ErrSystem},
-			"Missing context": {cli: mock_vcs.NewMockClientChooser(ctrl), in: repoURL, err: errup.ErrSystem},
-			"Missing url":     {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
+			"Missing context": {cli: mockvcs.NewMockClientChooser(ctrl), in: repoURL, err: errup.ErrSystem},
+			"Missing url":     {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
 			"Invalid":         {cli: newMockClientChooser(ctrl), ctx: ctx, in: unsafeURL, err: errup.ErrRepository},
-			"Ok":              {cli: mock_vcs.NewMockClientChooser(ctrl), ctx: ctx, in: repoURL},
+			"Ok":              {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, in: repoURL},
 		}
 	)
 	for name, ts := range dt {
@@ -91,8 +91,8 @@ func TestVCS_FetchURL(t *testing.T) {
 	}
 }
 
-func newMockClientChooser(ctrl *gomock.Controller) *mock_vcs.MockClientChooser {
-	c := mock_vcs.NewMockClientChooser(ctrl)
+func newMockClientChooser(ctrl *gomock.Controller) *mockvcs.MockClientChooser {
+	c := mockvcs.NewMockClientChooser(ctrl)
 	c.EXPECT().AllowInsecure(pkgName).Return(false).AnyTimes()
 	return c
 }
