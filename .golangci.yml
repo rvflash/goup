@@ -50,6 +50,10 @@ issues:
       text: "type assertion must be checked"
       linters:
         - forcetypeassert
+    - path: pkg/mod/file\.go
+      tex: "non-wrapping format verb for fmt.Errorf"
+      linters:
+        - errorlint
     - path: internal/app/app_test\.go
       text: "SA1012: do not pass a nil Context"
       linters:

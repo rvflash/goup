@@ -48,11 +48,11 @@ func Parse(path string) (*File, error) {
 	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", errors.ErrMod, err)
+		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}
 	f, err := modfile.Parse(path, b, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", errors.ErrMod, err)
+		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}
 	return &File{
 		raw:  f,
