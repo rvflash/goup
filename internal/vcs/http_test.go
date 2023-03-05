@@ -57,15 +57,15 @@ func TestHTTP_ClientFor(t *testing.T) {
 
 	// HTTPS > HTTPS
 	var err error
-	req, err = http.NewRequest("GET", "https://"+repo, nil)
+	req, err = http.NewRequest(http.MethodGet, "https://"+repo, nil)
 	are.NoErr(err)
 	var req2 *http.Request
-	req2, err = http.NewRequest("GET", "https://"+repo+"/new", nil)
+	req2, err = http.NewRequest(http.MethodGet, "https://"+repo+"/new", nil)
 	are.NoErr(err)
 	are.NoErr(cli.ClientFor(repo).(*http.Client).CheckRedirect(req, []*http.Request{req2})) // expected no error
 
 	// HTTPS > HTTPClient
-	req2, err = http.NewRequest("GET", "http://"+repo+"/new", nil)
+	req2, err = http.NewRequest(http.MethodGet, "http://"+repo+"/new", nil)
 	are.NoErr(err)
 	are.True(cli.ClientFor(repo).(*http.Client).CheckRedirect(req2, []*http.Request{req}) != nil) // expected error
 }

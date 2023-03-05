@@ -17,7 +17,7 @@ import (
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/goget"
-	mock_vcs "github.com/rvflash/goup/testdata/mock/vcs"
+	mockvcs "github.com/rvflash/goup/testdata/mock/vcs"
 )
 
 const (
@@ -48,7 +48,7 @@ func TestVCS_CanFetch(t *testing.T) {
 	for name, ts := range dt {
 		tt := ts
 		t.Run(name, func(t *testing.T) {
-			s := goget.New(mock_vcs.NewMockClientChooser(ctrl), mock_vcs.NewMockSystem(ctrl))
+			s := goget.New(mockvcs.NewMockClientChooser(ctrl), mockvcs.NewMockSystem(ctrl))
 			are.Equal(s.CanFetch(tt.in), tt.out) // mismatch fetch
 		})
 	}
@@ -69,16 +69,16 @@ func TestVCS_FetchPath(t *testing.T) {
 			err  error
 		}{
 			"default":     {err: errors.ErrRepository},
-			"http only":   {cli: mock_vcs.NewMockClientChooser(ctrl), err: errors.ErrRepository},
-			"system only": {git: mock_vcs.NewMockSystem(ctrl), err: errors.ErrRepository},
+			"http only":   {cli: mockvcs.NewMockClientChooser(ctrl), err: errors.ErrRepository},
+			"system only": {git: mockvcs.NewMockSystem(ctrl), err: errors.ErrRepository},
 			"missing context": {
-				cli: mock_vcs.NewMockClientChooser(ctrl),
-				git: mock_vcs.NewMockSystem(ctrl),
+				cli: mockvcs.NewMockClientChooser(ctrl),
+				git: mockvcs.NewMockSystem(ctrl),
 				err: errors.ErrRepository,
 			},
 			"missing path": {
-				cli: mock_vcs.NewMockClientChooser(ctrl),
-				git: mock_vcs.NewMockSystem(ctrl),
+				cli: mockvcs.NewMockClientChooser(ctrl),
+				git: mockvcs.NewMockSystem(ctrl),
 				ctx: context.Background(),
 				err: errors.ErrRepository,
 			},
@@ -117,16 +117,16 @@ func TestVCS_FetchURL(t *testing.T) {
 			err error
 		}{
 			"default":     {err: errors.ErrSystem},
-			"client only": {cli: mock_vcs.NewMockClientChooser(ctrl), err: errors.ErrSystem},
-			"system only": {git: mock_vcs.NewMockSystem(ctrl), err: errors.ErrSystem},
+			"client only": {cli: mockvcs.NewMockClientChooser(ctrl), err: errors.ErrSystem},
+			"system only": {git: mockvcs.NewMockSystem(ctrl), err: errors.ErrSystem},
 			"missing context": {
-				cli: mock_vcs.NewMockClientChooser(ctrl),
-				git: mock_vcs.NewMockSystem(ctrl),
+				cli: mockvcs.NewMockClientChooser(ctrl),
+				git: mockvcs.NewMockSystem(ctrl),
 				err: errors.ErrSystem,
 			},
 			"missing url": {
-				cli: mock_vcs.NewMockClientChooser(ctrl),
-				git: mock_vcs.NewMockSystem(ctrl),
+				cli: mockvcs.NewMockClientChooser(ctrl),
+				git: mockvcs.NewMockSystem(ctrl),
 				ctx: context.Background(),
 				err: errors.ErrRepository,
 			},
@@ -138,7 +138,7 @@ func TestVCS_FetchURL(t *testing.T) {
 			},
 			"invalid calls": {
 				cli: newMockClientChooser(ctrl, errors.ErrFetch),
-				git: mock_vcs.NewMockSystem(ctrl),
+				git: mockvcs.NewMockSystem(ctrl),
 				ctx: context.Background(),
 				uri: repoURL,
 				err: errors.ErrFetch,
@@ -165,9 +165,9 @@ func TestVCS_FetchURL(t *testing.T) {
 
 const oneTime = 1
 
-func newMockClientChooser(ctrl *gomock.Controller, err error) *mock_vcs.MockClientChooser {
+func newMockClientChooser(ctrl *gomock.Controller, err error) *mockvcs.MockClientChooser {
 	var (
-		c = mock_vcs.NewMockClientChooser(ctrl)
+		c = mockvcs.NewMockClientChooser(ctrl)
 		m = &mockClient{err: err}
 	)
 	if err != nil {
@@ -200,9 +200,9 @@ func (c *mockClient) Do(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func newMockSystem(ctrl *gomock.Controller) *mock_vcs.MockSystem {
+func newMockSystem(ctrl *gomock.Controller) *mockvcs.MockSystem {
 	var (
-		c = mock_vcs.NewMockSystem(ctrl)
+		c = mockvcs.NewMockSystem(ctrl)
 		v = semver.New(tagValue)
 	)
 	c.EXPECT().FetchURL(gomock.Any(), repoURL).Return(semver.Tags{v}, nil).Times(oneTime)
