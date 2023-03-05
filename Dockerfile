@@ -1,5 +1,5 @@
 # Download the dependencies (mod)
-FROM golang:1.13 as modules
+FROM golang:1.20 as modules
 
 ## Linux dependencies.
 RUN apt-get update && apt-get install -y git
@@ -9,7 +9,7 @@ RUN cd /mod && go mod download
 
 
 # Build the application (app)
-FROM golang:1.13 as builder
+FROM golang:1.20 as builder
 COPY --from=modules /go/pkg /go/pkg
 
 ## Add a non-privileged user
