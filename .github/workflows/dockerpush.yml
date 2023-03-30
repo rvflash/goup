@@ -48,7 +48,7 @@ jobs:
         run: echo ::save-state name=APP_VERSION::${GITHUB_REF##*/}
       - uses: actions/checkout@v3
       - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@v4
+        uses: elgohr/Publish-Docker-Github-Action@v5
         env:
           APP_VERSION: ${{env.APP_VERSION}}
         with:
