@@ -34,6 +34,7 @@ type Config struct {
 	InsecurePatterns string
 	OnlyReleases     string
 	Timeout          time.Duration
+	BasicAuth        vcs.BasicAuthentifier
 }
 
 // Checker must be implemented to checkFile updates on go.mod file or module.
@@ -54,7 +55,7 @@ func newGoUp(conf Config, sets ...setter) *goUp {
 			log:    make(chan Message),
 		}
 		httpClient = vcs.NewHTTPClient(conf.Timeout, conf.InsecurePatterns)
-		gitVCS     = git.New(httpClient)
+		gitVCS     = git.New(httpClient, conf.BasicAuth)
 	)
 	sets = append([]setter{
 		setGit(gitVCS),

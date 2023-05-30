@@ -99,7 +99,8 @@ func (l *Logger) printf(format string, color func(a ...interface{}) string, args
 
 func colors(f func(a ...interface{}) string, args []interface{}) []interface{} {
 	for k, v := range args {
-		args[k] = f(v)
+		arg := v
+		args[k] = f(arg)
 	}
 	return args
 }

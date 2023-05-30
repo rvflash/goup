@@ -14,6 +14,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/rvflash/goup/internal/errors"
@@ -30,13 +31,15 @@ const (
 
 // VCS is a Git PrintVersion Control VCS.
 type VCS struct {
+	auth    vcs.BasicAuthentifier
 	client  vcs.ClientChooser
 	storage storage.Storer
 }
 
 // New returns a new instance of VCS.
-func New(client vcs.ClientChooser) *VCS {
+func New(client vcs.ClientChooser, auth vcs.BasicAuthentifier) *VCS {
 	return &VCS{
+		auth:    auth,
 		client:  client,
 		storage: memory.NewStorage(),
 	}
@@ -110,8 +113,17 @@ func (s *VCS) fetch(rawURL string) *reference {
 		URLs: []string{u.String()},
 	})
 	// Retrieves the releases list of the repository.
-	var res []*plumbing.Reference
-	res, err = rem.List(&git.ListOptions{})
+	var (
+		res []*plumbing.Reference
+		rfs = &git.ListOptions{}
+	)
+	if ba := s.auth.BasicAuth(u.Host); ba != nil {
+		rfs.Auth = &http.BasicAuth{
+			Username: ba.Username,
+			Password: ba.Password,
+		}
+	}
+	res, err = rem.List(rfs)
 	if err != nil {
 		ref.err = vcs.Errorf(Name, errors.ErrFetch, err)
 		return ref
@@ -128,7 +140,7 @@ func (s *VCS) fetch(rawURL string) *reference {
 }
 
 func (s *VCS) ready(ctx context.Context) bool {
-	return ctx != nil && s.storage != nil && s.client != nil
+	return ctx != nil && s.storage != nil && s.client != nil && s.auth != nil
 }
 
 type reference struct {
