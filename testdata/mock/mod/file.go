@@ -5,63 +5,36 @@
 package mock_mod
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	mod "github.com/rvflash/goup/pkg/mod"
-	reflect "reflect"
 )
 
-// MockMod is a mock of Mod interface
+// MockMod is a mock of Mod interface.
 type MockMod struct {
 	ctrl     *gomock.Controller
 	recorder *MockModMockRecorder
 }
 
-// MockModMockRecorder is the mock recorder for MockMod
+// MockModMockRecorder is the mock recorder for MockMod.
 type MockModMockRecorder struct {
 	mock *MockMod
 }
 
-// NewMockMod creates a new mock instance
+// NewMockMod creates a new mock instance.
 func NewMockMod(ctrl *gomock.Controller) *MockMod {
 	mock := &MockMod{ctrl: ctrl}
 	mock.recorder = &MockModMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockMod) EXPECT() *MockModMockRecorder {
 	return m.recorder
 }
 
-// Module mocks base method
-func (m *MockMod) Module() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Module")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Module indicates an expected call of Module
-func (mr *MockModMockRecorder) Module() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Module", reflect.TypeOf((*MockMod)(nil).Module))
-}
-
-// Name mocks base method
-func (m *MockMod) Name() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockModMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockMod)(nil).Name))
-}
-
-// Dependencies mocks base method
+// Dependencies mocks base method.
 func (m *MockMod) Dependencies() []mod.Module {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Dependencies")
@@ -69,41 +42,13 @@ func (m *MockMod) Dependencies() []mod.Module {
 	return ret0
 }
 
-// Dependencies indicates an expected call of Dependencies
+// Dependencies indicates an expected call of Dependencies.
 func (mr *MockModMockRecorder) Dependencies() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dependencies", reflect.TypeOf((*MockMod)(nil).Dependencies))
 }
 
-// UpdateRequire mocks base method
-func (m *MockMod) UpdateRequire(path, version string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRequire", path, version)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateRequire indicates an expected call of UpdateRequire
-func (mr *MockModMockRecorder) UpdateRequire(path, version interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequire", reflect.TypeOf((*MockMod)(nil).UpdateRequire), path, version)
-}
-
-// UpdateReplace mocks base method
-func (m *MockMod) UpdateReplace(oldPath, newVersion string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateReplace", oldPath, newVersion)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateReplace indicates an expected call of UpdateReplace
-func (mr *MockModMockRecorder) UpdateReplace(oldPath, newVersion interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReplace", reflect.TypeOf((*MockMod)(nil).UpdateReplace), oldPath, newVersion)
-}
-
-// Format mocks base method
+// Format mocks base method.
 func (m *MockMod) Format() ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Format")
@@ -112,8 +57,64 @@ func (m *MockMod) Format() ([]byte, error) {
 	return ret0, ret1
 }
 
-// Format indicates an expected call of Format
+// Format indicates an expected call of Format.
 func (mr *MockModMockRecorder) Format() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Format", reflect.TypeOf((*MockMod)(nil).Format))
+}
+
+// Module mocks base method.
+func (m *MockMod) Module() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Module")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Module indicates an expected call of Module.
+func (mr *MockModMockRecorder) Module() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Module", reflect.TypeOf((*MockMod)(nil).Module))
+}
+
+// Name mocks base method.
+func (m *MockMod) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name.
+func (mr *MockModMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockMod)(nil).Name))
+}
+
+// UpdateReplace mocks base method.
+func (m *MockMod) UpdateReplace(oldPath, newVersion string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateReplace", oldPath, newVersion)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateReplace indicates an expected call of UpdateReplace.
+func (mr *MockModMockRecorder) UpdateReplace(oldPath, newVersion interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReplace", reflect.TypeOf((*MockMod)(nil).UpdateReplace), oldPath, newVersion)
+}
+
+// UpdateRequire mocks base method.
+func (m *MockMod) UpdateRequire(path, version string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRequire", path, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRequire indicates an expected call of UpdateRequire.
+func (mr *MockModMockRecorder) UpdateRequire(path, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequire", reflect.TypeOf((*MockMod)(nil).UpdateRequire), path, version)
 }

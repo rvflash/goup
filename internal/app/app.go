@@ -7,11 +7,14 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/log"
+	"github.com/rvflash/goup/internal/netrc"
+	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/pkg/goup"
 	"github.com/rvflash/goup/pkg/mod"
 )
@@ -32,7 +35,7 @@ func WithChecker(f goup.Checker) Configurator {
 }
 
 // WithLogger defines the logger used to print events.
-// By default we use a DevNull.
+// By default, we use a DevNull.
 func WithLogger(l log.Printer) Configurator {
 	return func(a *App) error {
 		if l == nil {
@@ -55,6 +58,18 @@ func WithParser(f mod.Parser) Configurator {
 	}
 }
 
+// WithNetrc parses netrc file to allow auto-login with basic authentication.
+func WithNetrc() Configurator {
+	return func(a *App) error {
+		rc, err := netrc.Parse()
+		if err != nil {
+			return fmt.Errorf("netrc: %w: %w", err, errors.ErrRepository)
+		}
+		a.autologin = rc
+		return nil
+	}
+}
+
 // Open tries to create a new instance of App.
 func Open(version string, opts ...Configurator) (*App, error) {
 	a := &App{
@@ -62,6 +77,7 @@ func Open(version string, opts ...Configurator) (*App, error) {
 	}
 	opts = append([]Configurator{
 		WithLogger(log.DevNull()),
+		WithNetrc(),
 		WithParser(mod.Parse),
 		WithChecker(goup.Check),
 	}, opts...)
@@ -79,6 +95,7 @@ type App struct {
 	goup.Config
 
 	check        goup.Checker
+	autologin    vcs.BasicAuthentifier
 	parse        mod.Parser
 	logger       log.Printer
 	buildVersion string
@@ -100,6 +117,7 @@ func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
 			return false
 		}
 	}
+	a.Config.BasicAuth = a.autologin
 	for _, path := range checkPaths(paths) {
 		f, err := a.parse(path)
 		if err != nil {

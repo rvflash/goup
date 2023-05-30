@@ -19,9 +19,10 @@ import (
 )
 
 const (
-	pkgName   = "github.com/src-d/go-git"
-	repoURL   = "https://github.com/src-d/go-git"
-	unsafeURL = "http://github.com/src-d/go-git"
+	hostname  = "github.com"
+	pkgName   = hostname + "/src-d/go-git"
+	repoURL   = "https://" + pkgName
+	unsafeURL = "http://" + pkgName
 )
 
 func TestVCS_CanFetch(t *testing.T) {
@@ -39,21 +40,38 @@ func TestVCS_FetchPath(t *testing.T) {
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
-			cli vcs.ClientChooser
-			ctx context.Context
-			in  string
-			err error
+			cli  vcs.ClientChooser
+			auth vcs.BasicAuthentifier
+			ctx  context.Context
+			in   string
+			err  error
 		}{
-			"default":         {err: errup.ErrSystem},
-			"missing context": {cli: mockvcs.NewMockClientChooser(ctrl), in: pkgName, err: errup.ErrSystem},
-			"missing path":    {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
-			"ok":              {cli: newMockClientChooser(ctrl), ctx: ctx, in: pkgName},
+			"Default":              {err: errup.ErrSystem},
+			"Missing authentifier": {cli: mockvcs.NewMockClientChooser(ctrl), err: errup.ErrSystem},
+			"Missing context": {
+				cli:  mockvcs.NewMockClientChooser(ctrl),
+				auth: mockvcs.NewMockBasicAuthentifier(ctrl),
+				in:   pkgName,
+				err:  errup.ErrSystem,
+			},
+			"Missing path": {
+				cli:  mockvcs.NewMockClientChooser(ctrl),
+				auth: mockvcs.NewMockBasicAuthentifier(ctrl),
+				ctx:  ctx,
+				err:  errup.ErrRepository,
+			},
+			"OK": {
+				cli:  newMockClientChooser(ctrl),
+				auth: newMockBasicAuthentifier(ctrl),
+				ctx:  ctx,
+				in:   pkgName,
+			},
 		}
 	)
 	for name, ts := range dt {
 		tt := ts
 		t.Run(name, func(t *testing.T) {
-			s := git.New(tt.cli)
+			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchPath(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 		})
@@ -69,22 +87,45 @@ func TestVCS_FetchURL(t *testing.T) {
 	var (
 		are = is.New(t)
 		dt  = map[string]struct {
-			cli vcs.ClientChooser
-			ctx context.Context
-			in  string
-			err error
+			cli  vcs.ClientChooser
+			auth vcs.BasicAuthentifier
+			ctx  context.Context
+			in   string
+			err  error
 		}{
-			"Default":         {err: errup.ErrSystem},
-			"Missing context": {cli: mockvcs.NewMockClientChooser(ctrl), in: repoURL, err: errup.ErrSystem},
-			"Missing url":     {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, err: errup.ErrRepository},
-			"Invalid":         {cli: newMockClientChooser(ctrl), ctx: ctx, in: unsafeURL, err: errup.ErrRepository},
-			"Ok":              {cli: mockvcs.NewMockClientChooser(ctrl), ctx: ctx, in: repoURL},
+			"Default":              {err: errup.ErrSystem},
+			"Missing authentifier": {cli: mockvcs.NewMockClientChooser(ctrl), err: errup.ErrSystem},
+			"Missing context": {
+				cli:  mockvcs.NewMockClientChooser(ctrl),
+				auth: mockvcs.NewMockBasicAuthentifier(ctrl),
+				in:   repoURL,
+				err:  errup.ErrSystem,
+			},
+			"Missing url": {
+				cli:  mockvcs.NewMockClientChooser(ctrl),
+				auth: mockvcs.NewMockBasicAuthentifier(ctrl),
+				ctx:  ctx,
+				err:  errup.ErrRepository,
+			},
+			"Invalid": {
+				cli:  newMockClientChooser(ctrl),
+				auth: mockvcs.NewMockBasicAuthentifier(ctrl),
+				ctx:  ctx,
+				in:   unsafeURL,
+				err:  errup.ErrRepository,
+			},
+			"OK": {
+				cli:  mockvcs.NewMockClientChooser(ctrl),
+				auth: newMockBasicAuthentifier(ctrl),
+				ctx:  ctx,
+				in:   repoURL,
+			},
 		}
 	)
 	for name, ts := range dt {
 		tt := ts
 		t.Run(name, func(t *testing.T) {
-			s := git.New(tt.cli)
+			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchURL(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error
 		})
@@ -95,4 +136,10 @@ func newMockClientChooser(ctrl *gomock.Controller) *mockvcs.MockClientChooser {
 	c := mockvcs.NewMockClientChooser(ctrl)
 	c.EXPECT().AllowInsecure(pkgName).Return(false).AnyTimes()
 	return c
+}
+
+func newMockBasicAuthentifier(ctrl *gomock.Controller) *mockvcs.MockBasicAuthentifier {
+	m := mockvcs.NewMockBasicAuthentifier(ctrl)
+	m.EXPECT().BasicAuth(hostname).Return(nil).AnyTimes()
+	return m
 }

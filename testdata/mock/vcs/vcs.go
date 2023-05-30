@@ -6,37 +6,38 @@ package mock_vcs
 
 import (
 	context "context"
+	http "net/http"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	semver "github.com/rvflash/goup/internal/semver"
 	vcs "github.com/rvflash/goup/internal/vcs"
-	http "net/http"
-	reflect "reflect"
 )
 
-// MockSystem is a mock of System interface
+// MockSystem is a mock of System interface.
 type MockSystem struct {
 	ctrl     *gomock.Controller
 	recorder *MockSystemMockRecorder
 }
 
-// MockSystemMockRecorder is the mock recorder for MockSystem
+// MockSystemMockRecorder is the mock recorder for MockSystem.
 type MockSystemMockRecorder struct {
 	mock *MockSystem
 }
 
-// NewMockSystem creates a new mock instance
+// NewMockSystem creates a new mock instance.
 func NewMockSystem(ctrl *gomock.Controller) *MockSystem {
 	mock := &MockSystem{ctrl: ctrl}
 	mock.recorder = &MockSystemMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSystem) EXPECT() *MockSystemMockRecorder {
 	return m.recorder
 }
 
-// CanFetch mocks base method
+// CanFetch mocks base method.
 func (m *MockSystem) CanFetch(path string) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CanFetch", path)
@@ -44,13 +45,13 @@ func (m *MockSystem) CanFetch(path string) bool {
 	return ret0
 }
 
-// CanFetch indicates an expected call of CanFetch
+// CanFetch indicates an expected call of CanFetch.
 func (mr *MockSystemMockRecorder) CanFetch(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CanFetch", reflect.TypeOf((*MockSystem)(nil).CanFetch), path)
 }
 
-// FetchPath mocks base method
+// FetchPath mocks base method.
 func (m *MockSystem) FetchPath(ctx context.Context, path string) (semver.Tags, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FetchPath", ctx, path)
@@ -59,13 +60,13 @@ func (m *MockSystem) FetchPath(ctx context.Context, path string) (semver.Tags, e
 	return ret0, ret1
 }
 
-// FetchPath indicates an expected call of FetchPath
+// FetchPath indicates an expected call of FetchPath.
 func (mr *MockSystemMockRecorder) FetchPath(ctx, path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchPath", reflect.TypeOf((*MockSystem)(nil).FetchPath), ctx, path)
 }
 
-// FetchURL mocks base method
+// FetchURL mocks base method.
 func (m *MockSystem) FetchURL(ctx context.Context, url string) (semver.Tags, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FetchURL", ctx, url)
@@ -74,36 +75,73 @@ func (m *MockSystem) FetchURL(ctx context.Context, url string) (semver.Tags, err
 	return ret0, ret1
 }
 
-// FetchURL indicates an expected call of FetchURL
+// FetchURL indicates an expected call of FetchURL.
 func (mr *MockSystemMockRecorder) FetchURL(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchURL", reflect.TypeOf((*MockSystem)(nil).FetchURL), ctx, url)
 }
 
-// MockClient is a mock of Client interface
+// MockBasicAuthentifier is a mock of BasicAuthentifier interface.
+type MockBasicAuthentifier struct {
+	ctrl     *gomock.Controller
+	recorder *MockBasicAuthentifierMockRecorder
+}
+
+// MockBasicAuthentifierMockRecorder is the mock recorder for MockBasicAuthentifier.
+type MockBasicAuthentifierMockRecorder struct {
+	mock *MockBasicAuthentifier
+}
+
+// NewMockBasicAuthentifier creates a new mock instance.
+func NewMockBasicAuthentifier(ctrl *gomock.Controller) *MockBasicAuthentifier {
+	mock := &MockBasicAuthentifier{ctrl: ctrl}
+	mock.recorder = &MockBasicAuthentifierMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBasicAuthentifier) EXPECT() *MockBasicAuthentifierMockRecorder {
+	return m.recorder
+}
+
+// BasicAuth mocks base method.
+func (m *MockBasicAuthentifier) BasicAuth(host string) *vcs.BasicAuth {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BasicAuth", host)
+	ret0, _ := ret[0].(*vcs.BasicAuth)
+	return ret0
+}
+
+// BasicAuth indicates an expected call of BasicAuth.
+func (mr *MockBasicAuthentifierMockRecorder) BasicAuth(host interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BasicAuth", reflect.TypeOf((*MockBasicAuthentifier)(nil).BasicAuth), host)
+}
+
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Do mocks base method
+// Do mocks base method.
 func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Do", req)
@@ -112,50 +150,36 @@ func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
 	return ret0, ret1
 }
 
-// Do indicates an expected call of Do
+// Do indicates an expected call of Do.
 func (mr *MockClientMockRecorder) Do(req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockClient)(nil).Do), req)
 }
 
-// MockClientChooser is a mock of ClientChooser interface
+// MockClientChooser is a mock of ClientChooser interface.
 type MockClientChooser struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientChooserMockRecorder
 }
 
-// MockClientChooserMockRecorder is the mock recorder for MockClientChooser
+// MockClientChooserMockRecorder is the mock recorder for MockClientChooser.
 type MockClientChooserMockRecorder struct {
 	mock *MockClientChooser
 }
 
-// NewMockClientChooser creates a new mock instance
+// NewMockClientChooser creates a new mock instance.
 func NewMockClientChooser(ctrl *gomock.Controller) *MockClientChooser {
 	mock := &MockClientChooser{ctrl: ctrl}
 	mock.recorder = &MockClientChooserMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClientChooser) EXPECT() *MockClientChooserMockRecorder {
 	return m.recorder
 }
 
-// ClientFor mocks base method
-func (m *MockClientChooser) ClientFor(path string) vcs.Client {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClientFor", path)
-	ret0, _ := ret[0].(vcs.Client)
-	return ret0
-}
-
-// ClientFor indicates an expected call of ClientFor
-func (mr *MockClientChooserMockRecorder) ClientFor(path interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClientFor", reflect.TypeOf((*MockClientChooser)(nil).ClientFor), path)
-}
-
-// AllowInsecure mocks base method
+// AllowInsecure mocks base method.
 func (m *MockClientChooser) AllowInsecure(path string) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllowInsecure", path)
@@ -163,8 +187,22 @@ func (m *MockClientChooser) AllowInsecure(path string) bool {
 	return ret0
 }
 
-// AllowInsecure indicates an expected call of AllowInsecure
+// AllowInsecure indicates an expected call of AllowInsecure.
 func (mr *MockClientChooserMockRecorder) AllowInsecure(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllowInsecure", reflect.TypeOf((*MockClientChooser)(nil).AllowInsecure), path)
+}
+
+// ClientFor mocks base method.
+func (m *MockClientChooser) ClientFor(path string) vcs.Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClientFor", path)
+	ret0, _ := ret[0].(vcs.Client)
+	return ret0
+}
+
+// ClientFor indicates an expected call of ClientFor.
+func (mr *MockClientChooserMockRecorder) ClientFor(path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClientFor", reflect.TypeOf((*MockClientChooser)(nil).ClientFor), path)
 }

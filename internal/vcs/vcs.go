@@ -22,6 +22,17 @@ type System interface {
 	FetchURL(ctx context.Context, url string) (semver.Tags, error)
 }
 
+// BasicAuth contains basic auth properties.
+type BasicAuth struct {
+	Username string
+	Password string
+}
+
+// BasicAuthentifier must be implemented to allow request with basic host by hostname.
+type BasicAuthentifier interface {
+	BasicAuth(host string) *BasicAuth
+}
+
 // Client must be implemented by any HTTP client.
 type Client interface {
 	Do(req *http.Request) (*http.Response, error)
