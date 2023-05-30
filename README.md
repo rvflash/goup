@@ -25,6 +25,7 @@ major+minor and by default, path.
 not require an HTTPS connection. Since version `v0.3.0`, `GOPRIVATE` has the same behavior. 
 1. Can amend on demand `go.mod` files with deprecated dependencies to update them.
 1. Since version `v0.4.0`, a colorized output in a TTY. 
+1. Allows to fetch Go modules from private repositories using ~/.netrc file or NETRC environment variable.
 
 
 ## Demo
