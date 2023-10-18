@@ -23,6 +23,7 @@ linters:
     - exhaustruct
     - cyclop
     - gofumpt
+    - depguard
 
 issues:
   exclude-use-default: false
