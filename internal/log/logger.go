@@ -98,11 +98,11 @@ func (l *Logger) printf(format string, color func(a ...interface{}) string, args
 }
 
 func colors(f func(a ...interface{}) string, args []interface{}) []interface{} {
+	res := make([]interface{}, len(args))
 	for k, v := range args {
-		arg := v
-		args[k] = f(arg)
+		res[k] = f(v)
 	}
-	return args
+	return res
 }
 
 func sPrintFunc(tty bool, values ...color.Attribute) func(a ...interface{}) string {
