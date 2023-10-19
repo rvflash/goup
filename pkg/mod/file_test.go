@@ -28,10 +28,11 @@ const (
 )
 
 var (
-	invalidGoMod = []string{"..", "..", "testdata", "golden", "invalid", mod.Filename}
-	updateGoMod  = []string{"..", "..", "testdata", "golden", "update", mod.Filename}
-	updatedGoMod = []string{"..", "..", "testdata", "golden", "updated", mod.Filename}
-	validGoMod   = []string{"..", "..", "testdata", "golden", "valid", mod.Filename}
+	invalidGoMod   = []string{"..", "..", "testdata", "golden", "invalid", mod.Filename}
+	updateGoMod    = []string{"..", "..", "testdata", "golden", "update", mod.Filename}
+	updatedGoMod   = []string{"..", "..", "testdata", "golden", "updated", mod.Filename}
+	validGoMod     = []string{"..", "..", "testdata", "golden", "valid", mod.Filename}
+	toolchainGoMod = []string{"..", "..", "testdata", "golden", "toolchain", mod.Filename}
 )
 
 func TestFile_Name(t *testing.T) {
@@ -111,11 +112,12 @@ func TestOpen(t *testing.T) {
 			depLen int
 			err    error
 		}{
-			"default":        {err: errup.ErrMod},
-			"invalid name":   {in: []string{"testdata"}, err: errup.ErrMod},
-			"invalid path":   {in: []string{"testdata", mod.Filename}, err: errup.ErrMod},
-			"invalid go.mod": {in: invalidGoMod, err: errup.ErrMod},
-			"valid go.mod":   {in: validGoMod, module: d3, depLen: numDep},
+			"default":          {err: errup.ErrMod},
+			"invalid name":     {in: []string{"testdata"}, err: errup.ErrMod},
+			"invalid path":     {in: []string{"testdata", mod.Filename}, err: errup.ErrMod},
+			"invalid go.mod":   {in: invalidGoMod, err: errup.ErrMod},
+			"valid go.mod":     {in: validGoMod, module: d3, depLen: numDep},
+			"toolchain go.mod": {in: toolchainGoMod, module: d3},
 		}
 	)
 	for name, ts := range dt {
