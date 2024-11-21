@@ -16,20 +16,25 @@ import (
 type Tags []Tag
 
 // Not removes from the list of tags the given tag.
-func (t Tags) Not(w fmt.Stringer) Tags {
-	key := func(t Tags) int {
+func (t Tags) Not(versions ...fmt.Stringer) Tags {
+	key := func(t Tags, xv fmt.Stringer) int {
 		for k, v := range t {
-			if Compare(v, w) == 0 {
+			if Compare(v, xv) == 0 {
 				return k
 			}
 		}
 		return -1
 	}
-	i := key(t)
-	if i < 0 {
-		return t
+	t2 := make([]Tag, len(t))
+	copy(t2, t)
+	for _, xv := range versions {
+		i := key(t2, xv)
+		if i < 0 {
+			return t2
+		}
+		t2 = append(t2[:i], t2[i+1:]...)
 	}
-	return append(t[:i], t[i+1:]...)
+	return t2
 }
 
 // Len implements the sort interface.

@@ -10,12 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
 	mockvcs "github.com/rvflash/goup/testdata/mock/vcs"
+
+	"go.uber.org/mock/gomock"
 )
 
 const (
@@ -70,7 +71,7 @@ func TestVCS_FetchPath(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchPath(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error
@@ -124,7 +125,7 @@ func TestVCS_FetchURL(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchURL(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error

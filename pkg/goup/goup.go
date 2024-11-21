@@ -8,7 +8,8 @@ package goup
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"fmt"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -150,9 +151,9 @@ func (e *goUp) checkDependency(ctx context.Context, dep mod.Module) *Entry {
 		if err != nil {
 			return newFailure(err, dep)
 		}
-		x, ok := dep.ExcludeVersion()
-		if ok {
-			vs = vs.Not(x)
+		x := dep.ExcludeVersions()
+		if len(x) > 0 {
+			vs = vs.Not(stringer(x)...)
 		}
 		v, ok := latest(vs, dep, e.Config.Major, e.Config.MajorMinor)
 		if !ok {
@@ -170,6 +171,14 @@ func (e *goUp) checkDependency(ctx context.Context, dep mod.Module) *Entry {
 	return newFailure(errs.ErrSystem, dep)
 }
 
+func stringer(list []semver.Tag) []fmt.Stringer {
+	res := make([]fmt.Stringer, len(list))
+	for k, v := range list {
+		res[k] = v
+	}
+	return res
+}
+
 func updateFile(file mod.Mod) error {
 	buf, err := file.Format()
 	if err != nil {
@@ -178,7 +187,7 @@ func updateFile(file mod.Mod) error {
 		}
 		return nil
 	}
-	return ioutil.WriteFile(file.Name(), buf, perm)
+	return os.WriteFile(file.Name(), buf, perm)
 }
 
 func (e *goUp) ready(ctx context.Context) bool {

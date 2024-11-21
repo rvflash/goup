@@ -6,7 +6,6 @@ package mod
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -46,7 +45,7 @@ func Parse(path string) (*File, error) {
 	if filepath.Base(path) != Filename {
 		return nil, errors.ErrMod
 	}
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}
@@ -150,7 +149,7 @@ func (f *File) Format() ([]byte, error) {
 
 // dependencies returns the list of modules in this go.mod file.
 // Firstly we get the modules used to replace legacy ones.
-// Then those required. We use the replace dependency instead of this required.
+// Then those required. We use the `replace` dependency instead of this required.
 func dependencies(f *modfile.File) []Module {
 	var m = make(map[string]Module)
 	for _, r := range f.Replace {
@@ -184,7 +183,7 @@ func dependencies(f *modfile.File) []Module {
 			// Ignores exclusion of any unused dependency.
 			continue
 		}
-		m[r.Mod.Path].(*module).excludeVersion = semver.New(r.Mod.Version)
+		m[r.Mod.Path].(*module).excludes = append(m[r.Mod.Path].(*module).excludes, semver.New(r.Mod.Version))
 	}
 	return modules(m)
 }

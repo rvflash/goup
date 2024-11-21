@@ -15,20 +15,20 @@ type Module interface {
 	Path() string
 	Replacement() bool
 	Version() semver.Tag
-	ExcludeVersion() (v semver.Tag, ok bool)
+	ExcludeVersions() []semver.Tag
 }
 
 type module struct {
 	indirect,
 	replacement bool
-	path string
-	excludeVersion,
-	version *semver.Version
+	path     string
+	excludes []semver.Tag
+	version  *semver.Version
 }
 
-// ExcludeVersion implements the module interface.
-func (m *module) ExcludeVersion() (v semver.Tag, ok bool) {
-	return m.excludeVersion, m.excludeVersion != nil
+// ExcludeVersions implements the module interface.
+func (m *module) ExcludeVersions() []semver.Tag {
+	return m.excludes
 }
 
 // Indirect implements the module interface.

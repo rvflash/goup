@@ -8,12 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/pkg/mod"
 	mockMod "github.com/rvflash/goup/testdata/mock/mod"
+
+	"go.uber.org/mock/gomock"
 )
 
 const (
@@ -84,7 +85,7 @@ func TestNewError(t *testing.T) {
 
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			msg := newError(tt.err, tt.file)
 			are.Equal(msg.Level(), ErrorLevel)               // mismatch level
 			are.True(strings.Contains(msg.Format(), tt.msg)) // mismatch message
@@ -123,7 +124,7 @@ func TestNewFailure(t *testing.T) {
 
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			msg := newFailure(tt.err, tt.dep)
 			are.Equal(msg.Level(), ErrorLevel)               // mismatch level
 			are.True(strings.Contains(msg.Format(), tt.msg)) // mismatch message
