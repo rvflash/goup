@@ -16,6 +16,6 @@ linters:
     - staticcheck
     - typecheck
     - unused
-    # Carians requirements
+    # Other requirements
     - gci
     - revive
