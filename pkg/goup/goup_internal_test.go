@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
@@ -22,6 +21,8 @@ import (
 	"github.com/rvflash/goup/pkg/mod"
 	mockMod "github.com/rvflash/goup/testdata/mock/mod"
 	mockVCS "github.com/rvflash/goup/testdata/mock/vcs"
+
+	"go.uber.org/mock/gomock"
 )
 
 func TestGoUp_CheckDependency(t *testing.T) {
@@ -197,7 +198,7 @@ func newModule(ctrl *gomock.Controller, indirect bool) *mockMod.MockModule {
 	m.EXPECT().Path().Return(repoName).AnyTimes()
 	m.EXPECT().Version().Return(semver.New(v0)).AnyTimes()
 	m.EXPECT().Indirect().Return(indirect).AnyTimes()
-	m.EXPECT().ExcludeVersion().Return(nil, false).AnyTimes()
+	m.EXPECT().ExcludeVersions().Return(nil).AnyTimes()
 	return m
 }
 

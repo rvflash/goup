@@ -4,7 +4,7 @@ linters-settings:
       - standard
       - prefix(github.com)
       - prefix(golang.org)
-      - prefix(google.golang.org)
+      - prefix(go.uber.org/mock)
 
 linters:
   enable-all: true

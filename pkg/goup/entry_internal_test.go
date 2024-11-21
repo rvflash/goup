@@ -8,12 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/pkg/mod"
 	mockMod "github.com/rvflash/goup/testdata/mock/mod"
+
+	"go.uber.org/mock/gomock"
 )
 
 const (

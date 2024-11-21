@@ -10,12 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	errup "github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/git"
 	mockvcs "github.com/rvflash/goup/testdata/mock/vcs"
+
+	"go.uber.org/mock/gomock"
 )
 
 const (

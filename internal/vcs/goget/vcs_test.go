@@ -11,13 +11,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/matryer/is"
 	"github.com/rvflash/goup/internal/errors"
 	"github.com/rvflash/goup/internal/semver"
 	"github.com/rvflash/goup/internal/vcs"
 	"github.com/rvflash/goup/internal/vcs/goget"
 	mockvcs "github.com/rvflash/goup/testdata/mock/vcs"
+
+	"go.uber.org/mock/gomock"
 )
 
 const (

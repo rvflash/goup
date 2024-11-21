@@ -26,13 +26,11 @@ func TestModule_Version(t *testing.T) {
 			mod = module{}
 			are = is.New(t)
 		)
-		are.Equal(mod.Indirect(), false) // mismatch indirect
-		are.Equal(mod.Path(), "")        // mismatch path
-		are.True(!mod.Replacement())     // mismatch replacement
-		are.Equal(mod.Version(), nil)    // mismatch version
-		x, ok := mod.ExcludeVersion()
-		are.True(!ok)     // unexpected exclude version
-		are.Equal(x, nil) // mismatch exclude version
+		are.Equal(mod.Indirect(), false)         // mismatch indirect
+		are.Equal(mod.Path(), "")                // mismatch path
+		are.True(!mod.Replacement())             // mismatch replacement
+		are.Equal(mod.Version(), nil)            // mismatch version
+		are.Equal(0, len(mod.ExcludeVersions())) // unexpected exclude version
 	})
 
 	t.Run("valued", func(t *testing.T) {
@@ -40,17 +38,17 @@ func TestModule_Version(t *testing.T) {
 		var (
 			v   = semver.New(version)
 			mod = module{
-				excludeVersion: v,
-				indirect:       indirect,
-				path:           path,
-				replacement:    true,
-				version:        v,
+				excludes:    []semver.Tag{v},
+				indirect:    indirect,
+				path:        path,
+				replacement: true,
+				version:     v,
 			}
 			are = is.New(t)
 		)
-		x, ok := mod.ExcludeVersion()
-		are.True(ok)                        // expected exclude version
-		are.Equal(x, v)                     // mismatch exclude version
+		x := mod.ExcludeVersions()
+		are.Equal(1, len(x))                // expected exclude version
+		are.Equal(x[0], v)                  // mismatch exclude version
 		are.Equal(mod.Indirect(), indirect) // mismatch indirect
 		are.Equal(mod.Path(), path)         // mismatch path
 		are.True(mod.Replacement())         // mismatch replacement
