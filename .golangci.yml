@@ -7,77 +7,15 @@ linters-settings:
       - prefix(go.uber.org/mock)
 
 linters:
-  enable-all: true
-  disable:
-    - wsl
-    - godox
-    - gomnd
-    - varnamelen
-    - wrapcheck
-    - nonamedreturns
-    - nlreturn
-    - goerr113
-    - ireturn
-    - exhaustive
-    - exhaustivestruct
-    - exhaustruct
-    - cyclop
-    - gofumpt
-    - depguard
-
-issues:
-  exclude-use-default: false
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gomnd
-        - gochecknoglobals
-        - funlen
-        - dupl
-        - gosec
-        - noctx
-        - forcetypeassert
-        - containedctx
-
-    - path: main\.go
-      text: "^buildVersion is a global variable"
-      linters:
-        - gochecknoglobals
-    - path: pkg/mod/file\.go
-      text: "G304: Potential file inclusion via variable"
-      linters:
-        - gosec
-    - path: pkg/mod/file\.go
-      text: "type assertion must be checked"
-      linters:
-        - forcetypeassert
-    - path: pkg/mod/file\.go
-      tex: "non-wrapping format verb for fmt.Errorf"
-      linters:
-        - errorlint
-    - path: internal/app/app_test\.go
-      text: "SA1012: do not pass a nil Context"
-      linters:
-        - staticcheck
-    - path: internal/vcs/http\.go
-      text: "G402: TLS InsecureSkipVerify set true."
-      linters:
-        - gosec
-    - linters:
-        - tparallel
-      text: "subtests should call t.Parallel"
-    - path: vcs_test\.go
-      linters:
-        - paralleltest
-    - path: pkg/goup/*
-      linters:
-        - paralleltest
-
-    - linters:
-        - lll
-      source: "^//go:generate "
-
-    # temporary "fix" waiting for https://github.com/kunwardeep/paralleltest/issues/14.
-    - linters:
-        - paralleltest
-      text: "does not use range value in test Run"
+  enable:
+    # Enabled by Default.
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    # Carians requirements
+    - gci
+    - revive

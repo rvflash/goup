@@ -7,7 +7,6 @@ package goup
 import (
 	"context"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,7 +68,7 @@ func TestGoUp_CheckDependency(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			u := newGoUp(tt.cnf, setGoGet(tt.system), setGit(tt.system))
 			e := u.checkDependency(tt.ctx, tt.module)
 			are.Equal(tt.level, e.Level())                    // mismatch level
@@ -84,7 +83,7 @@ func TestUpdateFile(t *testing.T) {
 	defer ctrl.Finish()
 
 	are := is.New(t)
-	dir, err := ioutil.TempDir("", "goup")
+	dir, err := os.MkdirTemp("", "goup")
 	defer func() {
 		_ = os.RemoveAll(dir)
 	}()
@@ -101,8 +100,8 @@ func TestUpdateFile(t *testing.T) {
 	}
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
-			err := updateFile(tt.file)
+		t.Run(name, func(_ *testing.T) {
+			err = updateFile(tt.file)
 			are.True(errors.Is(err, tt.err))                  // mismatch error
 			are.Equal(tt.updated, fileExists(tt.file.Name())) // mismatch file "created"
 		})
@@ -149,7 +148,7 @@ func TestLatest(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			out, ok := latest(tt.in, tt.dep, tt.cnf.Major, tt.cnf.MajorMinor)
 			are.Equal(out, tt.out) // mismatch tag
 			are.Equal(ok, tt.ok)   // mismatch found
@@ -186,7 +185,7 @@ func TestOnlyTag(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(*testing.T) {
 			err := onlyTag(tt.dep, tt.paths)
 			are.Equal(err, tt.err) // mismatch error
 		})

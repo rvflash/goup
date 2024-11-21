@@ -71,7 +71,7 @@ func TestVCS_FetchPath(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchPath(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error
@@ -125,7 +125,7 @@ func TestVCS_FetchURL(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := git.New(tt.cli, tt.auth)
 			_, err := s.FetchURL(tt.ctx, tt.in)
 			are.True(errors.Is(err, tt.err)) // mismatch error

@@ -48,7 +48,7 @@ func TestVCS_CanFetch(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := goget.New(mockvcs.NewMockClientChooser(ctrl), mockvcs.NewMockSystem(ctrl))
 			are.Equal(s.CanFetch(tt.in), tt.out) // mismatch fetch
 		})
@@ -94,7 +94,7 @@ func TestVCS_FetchPath(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := goget.New(tt.cli, tt.git)
 			res, err := s.FetchPath(tt.ctx, tt.path)
 			are.Equal(err, tt.err) // mismatch error
@@ -155,7 +155,7 @@ func TestVCS_FetchURL(t *testing.T) {
 	)
 	for name, ts := range dt {
 		tt := ts
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			s := goget.New(tt.cli, tt.git)
 			res, err := s.FetchURL(tt.ctx, tt.uri)
 			are.Equal(err, tt.err) // mismatch error

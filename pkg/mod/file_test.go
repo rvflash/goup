@@ -7,7 +7,6 @@ package mod_test
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,14 +56,14 @@ func TestFile_Format(t *testing.T) {
 	are.NoErr(err) // parse error
 	buf, err := out.Format()
 	are.True(errors.Is(err, errup.ErrNotModified))
-	got, err := ioutil.ReadFile(name)
+	got, err := os.ReadFile(name)
 	are.NoErr(err)                         // expected source file
 	are.Equal(buf, normalizeNewlines(got)) // expected no change
 	are.NoErr(out.UpdateReplace(d0, v0))   // update replace
 	are.NoErr(out.UpdateRequire(d1, v1))   // update require
 	got, err = out.Format()
 	are.NoErr(err) // writing failed
-	exp, err := ioutil.ReadFile(filepath.Join(updatedGoMod...))
+	exp, err := os.ReadFile(filepath.Join(updatedGoMod...))
 	are.NoErr(err)                                            // missing expecting
 	are.Equal(normalizeNewlines(got), normalizeNewlines(exp)) // mismatch data
 }
@@ -137,16 +136,16 @@ func TestOpen(t *testing.T) {
 
 func newTmpGoMod(t *testing.T) (name string, cleanup func()) {
 	t.Helper()
-	dir, err := ioutil.TempDir("", "goup")
+	dir, err := os.MkdirTemp("", "goup")
 	if err != nil {
 		t.Fatal(err)
 	}
-	buf, err := ioutil.ReadFile(filepath.Join(updateGoMod...))
+	buf, err := os.ReadFile(filepath.Join(updateGoMod...))
 	if err != nil {
 		log.Fatal(err)
 	}
 	name = filepath.Join(dir, "go.mod")
-	err = ioutil.WriteFile(name, buf, 0644)
+	err = os.WriteFile(name, buf, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

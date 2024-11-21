@@ -6,7 +6,6 @@ package mod
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -46,7 +45,7 @@ func Parse(path string) (*File, error) {
 	if filepath.Base(path) != Filename {
 		return nil, errors.ErrMod
 	}
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errors.ErrMod, err.Error())
 	}

@@ -91,7 +91,7 @@ func (l *Logger) printf(format string, color func(a ...interface{}) string, args
 	}
 	if len(args) == 0 {
 		// No argument, the entire message is colored
-		l.stderr.Printf(color(format))
+		l.stderr.Print(color(format))
 		return
 	}
 	l.stderr.Printf(format, colors(color, args)...)

@@ -125,7 +125,7 @@ func TestApp_Check(t *testing.T) {
 		}
 	}()
 	var a app.App
-	is.New(t).True(a.Check(nil, nil))
+	is.New(t).True(a.Check(context.TODO(), nil))
 }
 
 func TestWithChecker(t *testing.T) {

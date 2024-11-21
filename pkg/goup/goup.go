@@ -9,7 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -187,7 +187,7 @@ func updateFile(file mod.Mod) error {
 		}
 		return nil
 	}
-	return ioutil.WriteFile(file.Name(), buf, perm)
+	return os.WriteFile(file.Name(), buf, perm)
 }
 
 func (e *goUp) ready(ctx context.Context) bool {

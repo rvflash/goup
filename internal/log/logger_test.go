@@ -5,7 +5,6 @@
 package log_test
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -142,7 +141,7 @@ func callf(t *testing.T, w log.Printer, method string, format string, args ...in
 
 func readFile(t *testing.T, f *os.File) (string, int) {
 	t.Helper()
-	buf, err := ioutil.ReadFile(f.Name())
+	buf, err := os.ReadFile(f.Name())
 	if err != nil {
 		t.Error(err)
 		return "", 0
@@ -152,7 +151,7 @@ func readFile(t *testing.T, f *os.File) (string, int) {
 
 func newFile(t *testing.T) (*os.File, func() error) {
 	t.Helper()
-	f, err := ioutil.TempFile("", log.Prefix)
+	f, err := os.CreateTemp("", log.Prefix)
 	if err != nil {
 		t.Fatal(err)
 	}
