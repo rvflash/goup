@@ -2,8 +2,6 @@ module github.com/rvflash/goup
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/fatih/color v1.16.0
 	github.com/go-git/go-git/v5 v5.11.0
