@@ -47,7 +47,7 @@ on the [releases page](https://github.com/rvflash/goup/releases).
 ### Go
 
 ```shell
-GO111MODULE=on go get github.com/rvflash/goup@v0.4.3
+GO111MODULE=on go get github.com/rvflash/goup@v0.7.4
 ```
 
 ### Docker
