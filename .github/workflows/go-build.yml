@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 2
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.23'
+          go-version: '1.24'
       - name: Run coverage
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
       - name: Upload coverage to Codecov
@@ -26,7 +26,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.22.x, 1.23.x]
+        go-version: [1.24.4]
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
