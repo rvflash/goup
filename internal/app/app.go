@@ -117,7 +117,7 @@ func (a *App) Check(ctx context.Context, paths []string) (failure bool) {
 			return false
 		}
 	}
-	a.Config.BasicAuth = a.autologin
+	a.BasicAuth = a.autologin
 	for _, path := range checkPaths(paths) {
 		f, err := a.parse(path)
 		if err != nil {

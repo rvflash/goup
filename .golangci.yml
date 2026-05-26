@@ -1,21 +1,31 @@
-linters-settings:
-  gci:
-    sections:
-      - standard
-      - prefix(github.com)
-      - prefix(golang.org)
-      - prefix(go.uber.org/mock)
-
+version: "2"
 linters:
   enable:
-    # Enabled by Default.
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
-    # Other requirements
-    - gci
     - revive
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - prefix(github.com)
+        - prefix(golang.org)
+        - prefix(go.uber.org/mock)
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

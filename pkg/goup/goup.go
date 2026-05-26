@@ -155,7 +155,7 @@ func (e *goUp) checkDependency(ctx context.Context, dep mod.Module) *Entry {
 		if len(x) > 0 {
 			vs = vs.Not(stringer(x)...)
 		}
-		v, ok := latest(vs, dep, e.Config.Major, e.Config.MajorMinor)
+		v, ok := latest(vs, dep, e.Major, e.MajorMinor)
 		if !ok {
 			return newCheck(dep)
 		}
